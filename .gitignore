@@ -1,0 +1,10 @@
+*.py[cod]
+
+# Generated
+build
+dist
+*.egg*
+
+# Temporary files
+*~
+

@@ -1,0 +1,52 @@
+# Original script from https://github.com/silx-kit/silx
+
+sudo: required
+
+language: python
+
+notifications:
+  email: false
+
+env:
+  global:
+  - CACHED_FOLDER=$HOME/cached
+  - BUILD_FOLDER=$HOME
+
+matrix:
+  include:
+    - python: 2.7
+      os: linux
+
+cache:
+  directories:
+  - $HOME/.cache/pip
+  - $CACHED_FOLDER
+
+before_install:
+  - mkdir -p $CACHED_FOLDER
+  - mkdir -p $BUILD_FOLDER
+  - "if [ ${TRAVIS_OS_NAME:-'linux'} = 'linux' ]; then . $TRAVIS_BUILD_DIR/ci/prepare-travis.sh; fi"
+
+install:
+  # Install general build dependencies
+  - cd $BUILD_FOLDER
+  - "if [ ${TRAVIS_OS_NAME:-'linux'} = 'linux' ]; then . $TRAVIS_BUILD_DIR/tools/prepare_install-linux.sh -y -u; fi"
+
+  # Package directory  
+  - cd $TRAVIS_BUILD_DIR
+
+  # Print Python info
+  - "python $TRAVIS_BUILD_DIR/ci/info_platform.py"
+  - "pip list"
+
+  # Build package
+  - "python setup.py build"
+  - "python setup.py sdist bdist_wheel"
+
+  # Install package
+  - "pip install --pre --no-index --find-links dist/"
+
+script:
+  # Test the installed package
+  - "python -m wdncrunch.tests.test_all"
+
