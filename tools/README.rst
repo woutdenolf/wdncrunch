@@ -419,7 +419,7 @@ Show all keys:
 Start a project
 ---------------
 
-1. Create a project new project on github with licence
+1. Create a project new project on github
 
 2. Clone the project locally:
 
@@ -439,6 +439,10 @@ Start a project
 
     sphinx-quickstart
     sphinx-apidoc -o doc/source wdncrunch
+
+5. `Check whether the project can be released <localrefreleasable_>`_
+
+6. Register with CI services
 
 
 

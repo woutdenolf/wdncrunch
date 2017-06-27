@@ -13,5 +13,5 @@ Change Log
 * Empty project
 
 
-.. _genesis: https://github.com/woutdenolf/spectrocrunch/commit/genesis
-.. _develop: https://github.com/woutdenolf/spectrocrunch/compare/genesis...master
+.. _genesis: https://github.com/woutdenolf/wdncrunch/commit/genesis
+.. _develop: https://github.com/woutdenolf/wdncrunch/compare/genesis...master
