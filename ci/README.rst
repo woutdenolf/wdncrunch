@@ -89,3 +89,10 @@ Accept when:
 AppVeyor
 --------
 
+1. AppVeyor project settings:
+    custom configuration file name: ci/appveyor.yml
+    build version: {build}
+
+
+
+
