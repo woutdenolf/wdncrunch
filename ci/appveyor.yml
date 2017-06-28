@@ -7,11 +7,6 @@ build: false
 os:
     - Visual Studio 2015
 
-#branches:
-#  only:
-#    - master
-#    - production
-
 cache:
     - '%LOCALAPPDATA%\pip\Cache'
     - '%CACHED_FOLDER%'
@@ -19,8 +14,7 @@ cache:
 environment:
     global:
         WIN_SDK_ROOT: "C:\\Program Files\\Microsoft SDKs\\Windows"
-        VENV_BUILD_DIR: "venv_build"
-        VENV_TEST_DIR: "venv_test"
+        VENV_NAME: "venv_build"
 
         CACHED_FOLDER: "%LOCALAPPDATA%\\cashed"
 
@@ -63,8 +57,8 @@ install:
 
 build_script:
     # Create build virtualenv
-    - "virtualenv --clear %VENV_BUILD_DIR%"
-    - "%VENV_BUILD_DIR%\\Scripts\\activate.bat"
+    - "virtualenv --clear %VENV_NAME%"
+    - "%VENV_NAME%\\Scripts\\activate.bat"
 
     # Configure MSVC environment
     # Python 3.3 x64 and Python 3.4 x64 need a special configuration
@@ -82,32 +76,19 @@ build_script:
 
     # Build
     - "python setup.py build %BUILD_ARGS%"
-    - "python setup.py test"
     - "python setup.py bdist_wheel bdist_msi"
     - ps: "ls dist"
-    - "pip install --pre --no-index --find-links dist/ wdncrunch"
-
-    # Leave build virtualenv
-    - "%VENV_BUILD_DIR%\\Scripts\\deactivate.bat"
-    - "rmdir %VENV_BUILD_DIR% /s /q"
+    - "pip install --pre --no-index --find-links=dist/ %APPVEYOR_PROJECT_NAME%"
 
 test_script:
-    # Create test virtualenv
-    - "virtualenv --clear %VENV_TEST_DIR%"
-    - "%VENV_TEST_DIR%\\Scripts\\activate.bat"
+    # Test installation
+    - cd %HOMEDRIVE%%HOMEPATH%
+    - "python -m %APPVEYOR_PROJECT_NAME%.tests.test_all"
+    - cd %APPVEYOR_BUILD_FOLDER%
 
-    # Upgrade distribution modules
-    - "python -m pip install --upgrade pip"
-    - "pip install --pre --find-links dist/ wdncrunch"
-
-    # Print Python info
-    - "python ci\\info_platform.py"
-    - "pip list"
-    - "python setup.py test"
-
-    # Leave test virtualenv
-    - "%VENV_TEST_DIR%\\Scripts\\deactivate.bat"
-    - "rmdir %VENV_TEST_DIR% /s /q"
+    # Leave build virtualenv
+    - "%VENV_NAME%\\Scripts\\deactivate.bat"
+    - "rmdir %VENV_NAME% /s /q"
 
 artifacts:
     # Archive the generated wheel package in the ci.appveyor.com build report.
