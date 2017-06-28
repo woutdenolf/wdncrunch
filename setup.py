@@ -70,7 +70,7 @@ def get_version():
     return _version.strictversion
 
 def get_devstatus():
-    ## # The development status is derived from the SpectroCrunch release level
+    ## # The development status is derived from the release level
     mapping = {"dev":2,"alpha":3,"beta":4,"rc":5,"final":6}
     cycle = {1:"Planning",2:"Pre-Alpha",3:"Alpha",4:"Beta",5:"Production/Stable",6:"Mature",7:"Inactive"}
 

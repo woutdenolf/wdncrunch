@@ -329,10 +329,10 @@ Versioning
 
   SERIAL: bump when changes not to the code
   MICRO : bump when bug fix is done
-              when bumping SERIAL == 15
+               when bumping SERIAL == 15
   MINOR : bump when API changes backwards compatible
-              when new functionality is added
-              when bumping MICRO == 15
+               when new functionality is added
+               when bumping MICRO == 15
   MAJOR : bump when API changes not backwards compatible
  
   Always reset the lower numbers to 0.
@@ -428,19 +428,23 @@ Start a project
     git clone https://github.com/user/${PROJECT}
 
 2. Copy the wdncrunch template and adapt the following
-    setup.py: replace project name
-    README.rst: replace project name (not in the guidelines link)
-    ci/README.rst: remove
-    tools/README.rst: remove
-    doc: replace project name
-
-(e.g. CHANGELOG.rst, remove the instructions, change project name in setup.py, ...)
-
-3. Initialize the documentation:
 
 .. code-block:: bash
 
-    sphinx-quickstart (when you want to start from cratch)
+    export PROJECT=...
+    rsync -av wdncrunch/ ${PROJECT}/ --exclude .git --exclude ci/README.rst --exclude tools/README.rst
+    cd ${PROJECT}/
+    mv wdncrunch ${PROJECT}
+    
+    setup.py: replace project name and description
+    README.rst: replace project name (not in the guidelines link)
+    doc: replace project name
+
+3. Initialize the documentation when you want to start from scratch:
+
+.. code-block:: bash
+
+    sphinx-quickstart
     sphinx-apidoc -o doc/source/modules ${PROJECT}
 
 4. `Check whether the project can be released <localrefreleasable_>`_
@@ -449,13 +453,16 @@ Start a project
 
 .. code-block:: bash
 
-    cd ${PROJECT}
+    git add .
     git commit -m "Start from wdncrunch template"
     git tag -s genesis 21ee8fa -m "Unreleased genesis version"
-    git push origin
+    git push origin master:master
     git push origin genesis
 
-6. Register with CI services
+6. Github configuration:
+    * Add description
+    * Add license
+    * Register with CI services
 
 
 

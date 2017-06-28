@@ -2,7 +2,7 @@
 wdncrunch |release|
 ===================
 
-The wdncrunch provides a template for a python project with CI and documentation.
+The wdncrunch package provides a template for a python project with CI and documentation.
 
 .. toctree::
    :hidden:
