@@ -218,7 +218,7 @@ Check branch releasable
 
 .. code-block:: bash
   
-  python setup.py clean bdist_wheel
+  python setup.py clean bdist_wheel --universal
   cp dist/${PROJECT}-${VERSION}-py2.py3-none-any.whl ${RELEASEDIR}/dist
 
 8. Test the wheels
