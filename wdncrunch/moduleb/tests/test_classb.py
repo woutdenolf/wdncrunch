@@ -32,6 +32,7 @@ class test_classb(unittest.TestCase):
 
     def test(self):
         o = classb()
+        self.assertEqual(o.func(1),1)
 
 def test_suite_all():
     """Test suite including all test suites"""

@@ -1,19 +1,24 @@
-.. wdncrunch documentation master file, created by
-   sphinx-quickstart on Tue Jun 27 18:15:25 2017.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
 
-Welcome to wdncrunch's documentation!
-=====================================
+wdncrunch |release|
+===================
+
+The wdncrunch provides a template for a python project with CI and documentation.
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :hidden:
 
-    wdncrunch
+   modules/index
+   changelog
 
-Indices and tables
-==================
+:doc:`modules/index`
+    Documentation of the packages included in *wdncrunch*
+
+:doc:`changelog`
+    List of changes between releases
+
+
+Indices
+=======
 
 * :ref:`genindex`
 * :ref:`modindex`

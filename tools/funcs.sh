@@ -27,11 +27,11 @@ addProfile()
 {
 	addFile "$@"
 
-    if [[ $1 == $WDNCRUNCHRC ]]; then
+    if [[ $1 == $PROJECTRC ]]; then
         if [[ $INSTALL_SYSTEMWIDE == true ]]; then
-            addFile "/etc/bash.bashrc" "[ -r $WDNCRUNCHRC ] && source \"$WDNCRUNCHRC\""
+            addFile "/etc/bash.bashrc" "[ -r $PROJECTRC ] && source \"$PROJECTRC\""
         else
-            addFile "$HOME/.bashrc" "[ -r $WDNCRUNCHRC ] && source \"$WDNCRUNCHRC\""
+            addFile "$HOME/.bashrc" "[ -r $PROJECTRC ] && source \"$PROJECTRC\""
         fi
     fi
 
@@ -222,33 +222,33 @@ _initEnv()
     fi
 
     if [[ $INSTALL_SYSTEMWIDE == true ]]; then
-        WDNCRUNCHRC="/etc/WDNCRUNCH.bashrc"
+        PROJECTRC="/etc/PROJECT.bashrc"
     else
-        WDNCRUNCHRC="$HOME/.WDNCRUNCHrc"
+        PROJECTRC="$HOME/.PROJECTrc"
     fi
 
     if [[ $INSTALL_SYSTEMWIDE == true ]]; then
-        WDNCRUNCHLOCAL="/usr/local"
+        PROJECTLOCAL="/usr/local"
     else
-        WDNCRUNCHLOCAL="$HOME/.local"
+        PROJECTLOCAL="$HOME/.local"
     fi
 
     if [[ $INSTALL_SYSTEMWIDE == true ]]; then
-        WDNCRUNCHLOCALSTR="/usr/local"
+        PROJECTLOCALSTR="/usr/local"
     else
-        WDNCRUNCHLOCALSTR="\$HOME/.local"
+        PROJECTLOCALSTR="\$HOME/.local"
     fi
 
     if [[ $INSTALL_SYSTEMWIDE == true ]]; then
-        WDNCRUNCHOPT="/opt"
+        PROJECTOPT="/opt"
     else
-        WDNCRUNCHOPT="$HOME/.local"
+        PROJECTOPT="$HOME/.local"
     fi
 
     if [[ $INSTALL_SYSTEMWIDE == true ]]; then
-        WDNCRUNCHOPTSTR="/opt"
+        PROJECTOPTSTR="/opt"
     else
-        WDNCRUNCHOPTSTR="\$HOME/.local"
+        PROJECTOPTSTR="\$HOME/.local"
     fi
 
     # ============Installation progress============

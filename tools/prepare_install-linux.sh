@@ -1,6 +1,6 @@
 #!/bin/bash
 # 
-# This script will install all wdncrunch Python 2 and 3 dependencies.
+# This script will install all Python 2 and 3 dependencies.
 # 
 
 # ============Usage============
@@ -154,11 +154,11 @@ if [[ $NOTDRY == true ]]; then
     if [[ $SYSTEM_PRIVILIGES == true ]]; then
         mexec "apt-get -y autoremove"
     else
-        cprint "Variables have been added to $WDNCRUNCHRC."
+        cprint "Variables have been added to $PROJECTRC."
     fi
 
     if [[ $TIMELEFT == true ]]; then
-        cprint "All done ($BUILDSTEP/$BUILDSTEPS)! You should now be able to install wdncrunch."
+        cprint "All done ($BUILDSTEP/$BUILDSTEPS)! You should now be able to install the project."
     else
         cprint "Not everything has been build due to time restrictions. Run the script again ($BUILDSTEP/$BUILDSTEPS)."
     fi

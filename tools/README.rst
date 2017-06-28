@@ -13,6 +13,7 @@ Guide for developers
 
 6. `Start a project. <localrefstart_>`_
 
+
 .. _localrefconfiggit:
 
 Configure git
@@ -32,14 +33,15 @@ The signing key is only needed by project managers to sign tags and PyPi release
 Contribute
 ----------
 
-Assuming you forked wdncrunch on Github, then your fork will be referred to as "origin" and the repository you forked from will be referred to as "upstream".
+Assuming you forked the project on Github, then your fork will be referred to as "origin" and the repository you forked from will be referred to as "upstream".
 
 * Clone your fork locally:
 
 .. code-block:: bash
 
-  git clone https://github.com/forkuser/wdncrunch
-  git remote add upstream https://github.com/woutdenolf/wdncrunch
+  export PROJECT=wdncrunch (or any other project name)
+  git clone https://github.com/forkuser/${PROJECT}
+  git remote add upstream https://github.com/woutdenolf/${PROJECT}
 
 * Add a feature:
 
@@ -63,11 +65,11 @@ Assuming you forked wdncrunch on Github, then your fork will be referred to as "
 
 * Create a new pull request with
 
-  base fork: woutdenolf/wdncrunch (upstream)
+  base fork: woutdenolf/${PROJECT} (upstream)
 
   base: master
 
-  head fork: forkuser/wdncrunch (origin)
+  head fork: forkuser/${PROJECT} (origin)
 
   compare: feat-something
 
@@ -118,11 +120,11 @@ Increase the version
 
 5. Create a new pull request with
 
-   base fork: woutdenolf/wdncrunch (upstream)
+   base fork: woutdenolf/${PROJECT} (upstream)
 
    base: master
 
-   head fork: forkuser/wdncrunch (origin)
+   head fork: forkuser/${PROJECT} (origin)
 
    compare: v1.2.3
 
@@ -159,8 +161,8 @@ Release and deploy
 
 .. code-block:: bash
 
-  https://testpypi.python.org/pypi?%3Aaction=pkg_edit&name=wdncrunch
-  http://pypi.python.org/pypi?%3Aaction=pkg_edit&name=wdncrunch
+  https://testpypi.python.org/pypi?%3Aaction=pkg_edit&name=${PROJECT}
+  http://pypi.python.org/pypi?%3Aaction=pkg_edit&name=${PROJECT}
 
 
 .. _localrefreleasable:
@@ -184,16 +186,16 @@ Check branch releasable
 .. code-block:: bash
   
   python setup.py clean sdist
-  cp dist/wdncrunch-${VERSION}.tar.gz ${RELEASEDIR}/dist
+  cp dist/${PROJECT}-${VERSION}.tar.gz ${RELEASEDIR}/dist
 
 4. Test the source
 
 .. code-block:: bash
   
-  tar zxvf ${RELEASEDIR}/dist/wdncrunch-${VERSION}.tar.gz
-  cd wdncrunch-${VERSION}
+  tar zxvf ${RELEASEDIR}/dist/${PROJECT}-${VERSION}.tar.gz
+  cd ${PROJECT}-${VERSION}
   pip install .
-  python -m wdncrunch.tests.test_all
+  python -m ${PROJECT}.tests.test_all
   
 5. Release the docs
 
@@ -201,7 +203,7 @@ Check branch releasable
   
   pip install sphinx
   python setup.py clean build_doc
-  pip uninstall -y wdncrunch
+  pip uninstall -y ${PROJECT}
   cd build/sphinx/html
   zip -r ${RELEASEDIR}/html_doc.zip .
   cd ../../..
@@ -217,15 +219,15 @@ Check branch releasable
 .. code-block:: bash
   
   python setup.py clean bdist_wheel
-  cp dist/wdncrunch-${VERSION}-py2.py3-none-any.whl ${RELEASEDIR}/dist
+  cp dist/${PROJECT}-${VERSION}-py2.py3-none-any.whl ${RELEASEDIR}/dist
 
 8. Test the wheels
 
 .. code-block:: bash
   
-  pip install ${RELEASEDIR}/dist/wdncrunch-${VERSION}-py2.py3-none-any.whl
-  python -m wdncrunch.tests.test_all
-  pip uninstall -y wdncrunch
+  pip install ${RELEASEDIR}/dist/${PROJECT}-${VERSION}-py2.py3-none-any.whl
+  python -m ${PROJECT}.tests.test_all
+  pip uninstall -y ${PROJECT}
 
 9. Delete the `sandbox  <localrefsandbox_>`_
 
@@ -347,7 +349,7 @@ Install external dependencies
 
 .. code-block:: bash
 
-    . wdncrunch/tools/prepare_install-linux.sh [-v 3]
+    . ${PROJECT}/tools/prepare_install-linux.sh [-v 3]
     if [[ $? == 0 ]]; then echo "OK"; else echo "NOT OK"; fi
 
 
@@ -419,28 +421,39 @@ Show all keys:
 Start a project
 ---------------
 
-1. Create a project new project on github
-
-2. Clone the project locally:
+1. Create an empty project on github and clone it locally
 
 .. code-block:: bash
 
-    git clone https://github.com/forkuser/wdncrunch
-    cd wdncrunch
+    git clone https://github.com/user/${PROJECT}
+
+2. Copy the wdncrunch template and adapt the following
+    setup.py: replace project name
+    README.rst: replace project name (not in the guidelines link)
+    ci/README.rst: remove
+    tools/README.rst: remove
+    doc: replace project name
+
+(e.g. CHANGELOG.rst, remove the instructions, change project name in setup.py, ...)
+
+3. Initialize the documentation:
+
+.. code-block:: bash
+
+    sphinx-quickstart (when you want to start from cratch)
+    sphinx-apidoc -o doc/source/modules ${PROJECT}
+
+4. `Check whether the project can be released <localrefreleasable_>`_
+
+5. Create genesis version
+
+.. code-block:: bash
+
+    cd ${PROJECT}
+    git commit -m "Start from wdncrunch template"
     git tag -s genesis 21ee8fa -m "Unreleased genesis version"
     git push origin
     git push origin genesis
-
-3. Copy the wdncrunch template and commit
-
-4. Initialize the documentation:
-
-.. code-block:: bash
-
-    sphinx-quickstart
-    sphinx-apidoc -o doc/source wdncrunch
-
-5. `Check whether the project can be released <localrefreleasable_>`_
 
 6. Register with CI services
 

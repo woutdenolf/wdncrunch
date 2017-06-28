@@ -21,10 +21,35 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+"""This module provides classb
+"""
 
 class classb(object):
+    """Discription of classb
+    """
 
     def __init__(self):
         pass
 
+    def _func(self,x):
+        """Function description
+
+        Args:
+            x (num): a number
+
+        Returns:
+            num: same as input
+        """
+        return x
+
+    def func(self,x):
+        """Function description
+
+        Args:
+            x (num): a number
+
+        Returns:
+            num: same as input
+        """
+        return self._func(x)
     

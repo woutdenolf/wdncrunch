@@ -64,8 +64,9 @@ Pre-build dependencies
 .. code-block:: bash
 
   apt-get install git
-  git clone https://github.com/woutdenolf/wdncrunch.git
-  . wdncrunch/tools/prepare_install-linux.sh -u
+  export PROJECT=wdncrunch (or any other project name)
+  git clone https://github.com/woutdenolf/${PROJECT}.git
+  . ${PROJECT}/tools/prepare_install-linux.sh -u
 
 Accept when:
 
@@ -81,8 +82,8 @@ Accept when:
 
 .. code-block:: bash
 
-  tar -czf wdncrunch.travis.python2.7.tgz 2.7/lib1 2.7/lib2 ...
-  curl --upload-file wdncrunch.travis.python2.7.tgz https://transfer.sh/wdncrunch.travis.python2.7.tgz
+  tar -czf ${PROJECT}.travis.python2.7.tgz 2.7/lib1 2.7/lib2 ...
+  curl --upload-file ${PROJECT}.travis.python2.7.tgz https://transfer.sh/${PROJECT}.travis.python2.7.tgz
 
 .. _localrefappveyor:
 

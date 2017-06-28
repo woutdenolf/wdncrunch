@@ -1,13 +1,13 @@
 #!/bin/bash
 # 
-# This script will install all spectrocrunch Python 2 and 3 dependencies for CI.
+# This script will install all Python 2 and 3 dependencies for CI.
 # 
 
 # Download pre-build libraries
 PYTHONV=`python -c "import sys;t='{v[0]}.{v[1]}'.format(v=list(sys.version_info[:2]));print(t)";`
 
 if [ ! -d ${PYTHONV} ]; then
-    FILE=spectrocrunch.travis.python${PYTHONV}.tgz
+    FILE=wdncrunch.travis.python${PYTHONV}.tgz
     if [[ ${PYTHONV} == "2.7" ]]; then
         LINK=https://transfer.sh/fGRlO/$FILE
     else

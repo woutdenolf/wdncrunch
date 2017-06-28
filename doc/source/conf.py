@@ -31,7 +31,9 @@
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = ['sphinx.ext.autodoc',
-    'sphinx.ext.mathjax']
+    'sphinx.ext.todo',
+    'sphinx.ext.mathjax',
+    'sphinx.ext.viewcode']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -47,8 +49,10 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'wdncrunch'
-copyright = u'2017, Wout De Nolf'
 author = u'Wout De Nolf'
+import datetime
+now = datetime.datetime.now()
+copyright = u'2015-%s, European Synchrotron Radiation Facility, Grenoble' % now.year
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -64,7 +68,7 @@ from _version import strictversion as release
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = 'en'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -83,7 +87,7 @@ todo_include_todos = False
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
+html_theme = 'classic'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
