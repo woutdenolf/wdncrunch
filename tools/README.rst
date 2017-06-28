@@ -459,7 +459,7 @@ Start a project
     git push origin master:master
     git push origin genesis
 
-6. Github configuration:
+6. Github configuration
     * Add description
     * Add license
     * Register with CI services
