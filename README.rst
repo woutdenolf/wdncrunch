@@ -33,7 +33,9 @@ Test:
 
 Documentation:
 
-http://pythonhosted.org/wdncrunch
+ Release: http://pythonhosted.org/wdncrunch
+
+ Latest: http://wdncrunch.readthedocs.io/en/latest/
 
 
 Developers
