@@ -16,8 +16,8 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
+import os
+import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
 
@@ -59,11 +59,8 @@ copyright = u'2015-%s, European Synchrotron Radiation Facility, Grenoble' % now.
 # built documents.
 # 
 # 
-import os
-import sys
 dirname = os.path.dirname
 root_dir = dirname(dirname(dirname(os.path.abspath(__file__))))
-import sys
 sys.path.insert(0, root_dir)
 #
 # The short X.Y version.

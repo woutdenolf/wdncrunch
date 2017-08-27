@@ -41,7 +41,7 @@ Documentation:
 Developers
 ----------
 
-|Travis Status Master| |Appveyor Status Master|
+|Travis Status Master| |Appveyor Status Master|  |Rtd Status Master|
 
 Main development website: https://github.com/woutdenolf/wdncrunch
 
@@ -65,7 +65,7 @@ to the top of your script
 .. code-block::
 
     import sys
-    sys.path.insert(1,'/data/id21/inhouse/wout/dev/wdncrunch')
+    sys.path.insert(1,'.../wdncrunch')
 
 
 Import as follows:
@@ -79,3 +79,6 @@ Import as follows:
    :target: https://travis-ci.org/woutdenolf/wdncrunch
 .. |Appveyor Status Master| image:: https://ci.appveyor.com/api/projects/status/github/woutdenolf/wdncrunch?svg=true&branch=master
    :target: https://ci.appveyor.com/project/woutdenolf/wdncrunch/branch/master
+.. |Rtd Status Master| image:: http://wdncrunch.readthedocs.io/en/master/?badge=master
+   :target: http://wdncrunch.readthedocs.io/en/master/
+   
