@@ -77,7 +77,9 @@ Accept when:
   Python include: /opt/python/2.7.13/include/python2.7 
   Python library: /opt/python/2.7.13/lib/libpython2.7.so 
   Pip: 9.0.1 from /home/travis/virtualenv/python2.7.13/lib/python2.7/site-packages (python 2.7) 
-
+  Root priviliges: true 
+  System wide installation: false 
+  
 6. Create pre-build and upload:
 
 .. code-block:: bash
