@@ -21,7 +21,7 @@ Pre-build dependencies
   adduser travis
   usermod -aG sudo travis
 
-2. Install Python 2.7.12 from source:
+2. Install Python 2.7.13 from source (or any other python version used by Travis):
 
 .. code-block:: bash
 
@@ -29,19 +29,19 @@ Pre-build dependencies
   apt-get update
   apt-get install libbz2-dev libsqlite3-dev libreadline-dev zlib1g-dev libncurses5-dev libssl-dev libgdbm-dev libssl-dev openssl tk-dev
 
-  wget https://www.python.org/ftp/python/2.7.12/Python-2.7.12.tgz
-  tar -xvzf Python-2.7.12.tgz
-  rm Python-2.7.12.tgz
-  cd Python-2.7.12
+  wget https://www.python.org/ftp/python/2.7.13/Python-2.7.13.tgz
+  tar -xvzf Python-2.7.13.tgz
+  rm Python-2.7.13.tgz
+  cd Python-2.7.13
 
-  ./configure --prefix=/opt/python/2.7.12 --enable-shared LDFLAGS=-Wl,-rpath=/opt/python/2.7.12/lib
+  ./configure --prefix=/opt/python/2.7.13 --enable-shared LDFLAGS=-Wl,-rpath=/opt/python/2.7.13/lib
   make -j2
   make install
 
   cd ..
-  rm -rf Python-2.7.12
+  rm -rf Python-2.7.13
 
-  export PATH="/opt/python/2.7.12/bin/:$PATH"
+  export PATH="/opt/python/2.7.13/bin/:$PATH"
 
 3. Install pip:
 
@@ -56,8 +56,8 @@ Pre-build dependencies
 .. code-block:: bash
 
   cd /home/travis
-  virtualenv python2.7.12
-  source python2.7.12/bin/activate
+  virtualenv python2.7.13
+  source python2.7.13/bin/activate
 
 5. Install dependencies:
 
@@ -72,11 +72,11 @@ Accept when:
 
 .. code-block:: bash
 
-  Python version: 2.7.12 
-  Python location: /home/travis/virtualenv/python2.7.12/bin/python 
-  Python include: /opt/python/2.7.12/include/python2.7 
-  Python library: /opt/python/2.7.12/lib/libpython2.7.so 
-  Pip: 9.0.1 from /home/travis/virtualenv/python2.7.12/lib/python2.7/site-packages (python 2.7) 
+  Python version: 2.7.13 
+  Python location: /home/travis/virtualenv/python2.7.13/bin/python 
+  Python include: /opt/python/2.7.13/include/python2.7 
+  Python library: /opt/python/2.7.13/lib/libpython2.7.so 
+  Pip: 9.0.1 from /home/travis/virtualenv/python2.7.13/lib/python2.7/site-packages (python 2.7) 
 
 6. Create pre-build and upload:
 
