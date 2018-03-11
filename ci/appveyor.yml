@@ -73,13 +73,8 @@ build_script:
 
 test_script:
 
-    # Test installation
-    - ps: |
-          try {
-              invoke-expression "$PYTHONBIN -m $env:APPVEYOR_PROJECT_NAME.tests.test_all"
-          } catch {
-              throw "Unit tests failed"
-          }
+    # Test installation (cannot make it work with invoke-expression "$PYTHONBIN ...")
+    - ps: python -m $env:APPVEYOR_PROJECT_NAME.tests.test_all
     - ps: cd $env:APPVEYOR_BUILD_FOLDER
 
 artifacts:
