@@ -60,6 +60,8 @@ install:
 
   # Build package
   - $PYTHONBIN setup.py build
+  - $PYTHONBIN setup.py build_doc
+  - ls build
   - $PYTHONBIN setup.py sdist bdist_wheel
   - ls dist
 
