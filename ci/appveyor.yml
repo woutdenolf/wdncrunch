@@ -53,26 +53,26 @@ install:
 build_script:
 
     # Package directory  
-    - ps: cd $env:APPVEYOR_BUILD_FOLDER
+    - cmd: cd %APPVEYOR_BUILD_FOLDER%
 
     # Print Python info
-    #- ps: invoke-expression "$PYTHONBIN ci\\info_platform.py"
-    - ps: invoke-expression "$PIPBIN list"
+    - cmd: %PYTHONBIN% ci\\info_platform.py
+    - cmd: %PIPBIN% list
 
     # Build package
-    - ps: invoke-expression "$PYTHONBIN setup.py build"
-    - ps: invoke-expression "$PYTHONBIN setup.py bdist_wheel bdist_msi"
+    - cmd: "%PYTHONBIN% setup.py build"
+    - cmd: "%PYTHONBIN% setup.py bdist_wheel bdist_msi"
     - ps: ls dist
 
     # Install package
-    - ps: invoke-expression "$PIPBIN install --pre --no-index --find-links=dist/ $env:APPVEYOR_PROJECT_NAME"
+    - cmd: "%PIPBIN% install --pre --no-index --find-links=dist/ $env:APPVEYOR_PROJECT_NAME"
 
 test_script:
 
     # Test installation
-    - ps: cd $env:HOMEDRIVE$env:HOMEPATH
-    - ps: invoke-expression "$PYTHONBIN -m $env:APPVEYOR_PROJECT_NAME.tests.test_all"
-    - ps: cd $env:APPVEYOR_BUILD_FOLDER
+    - cmd: cd %HOMEDRIVE%%HOMEPATH%
+    - cmd: "%PYTHONBIN% -m $env:APPVEYOR_PROJECT_NAME.tests.test_all"
+    - cmd: cd %APPVEYOR_BUILD_FOLDER%
 
 artifacts:
     # Archive the generated wheel package in the ci.appveyor.com build report.
