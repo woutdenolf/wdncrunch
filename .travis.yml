@@ -65,10 +65,10 @@ install:
 
   # Install package
   - PROJECTNAME=`python setup.py name|tail -1`
-  - $PIPBIN install --pre --no-index --find-links=dist/ ${PROJECTNAME}
+  - cd $HOME
+  - $PIPBIN install --pre --no-index --find-links=$TRAVIS_BUILD_DIR/dist/ ${PROJECTNAME}
 
 script:
   # Test the installed package
-  - cd $HOME
   - $PYTHONBIN -m $PROJECTNAME.tests.test_all
 

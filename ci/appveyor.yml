@@ -67,12 +67,12 @@ build_script:
     - ps: ls dist
 
     # Install package
-    - ps: invoke-expression "$PIPBIN install --pre --no-index --find-links=dist/ $env:APPVEYOR_PROJECT_NAME"
+    - ps: cd $env:HOMEDRIVE$env:HOMEPATH
+    - ps: invoke-expression "$PIPBIN install --pre --no-index --find-links=$env:APPVEYOR_BUILD_FOLDER/dist/ $env:APPVEYOR_PROJECT_NAME"
 
 test_script:
 
     # Test installation
-    - ps: cd $env:HOMEDRIVE$env:HOMEPATH
     - ps: invoke-expression "$PYTHONBIN -m $env:APPVEYOR_PROJECT_NAME.tests.test_all"
     - ps: cd $env:APPVEYOR_BUILD_FOLDER
 
