@@ -38,11 +38,17 @@ before_install:
 install:
   # Install Travis specific dependencies
   - cd $BUILD_FOLDER
-  - if [ ${TRAVIS_OS_NAME:-'linux'} = 'linux' ]; then . $TRAVIS_BUILD_DIR/ci/prepare_travis-linux.sh; fi
+  - |
+    if [ ${TRAVIS_OS_NAME:-'linux'} = 'linux' ]; then
+        . $TRAVIS_BUILD_DIR/ci/prepare_travis-linux.sh;
+    fi
 
   # Install general build dependencies
   - cd $BUILD_FOLDER
-  - if [ ${TRAVIS_OS_NAME:-'linux'} = 'linux' ]; then . $TRAVIS_BUILD_DIR/tools/prepare_install-linux.sh -y -u; fi
+  - |
+    if [ ${TRAVIS_OS_NAME:-'linux'} = 'linux' ]; then
+        . $TRAVIS_BUILD_DIR/tools/prepare_install-linux.sh -y -u;
+    fi
   - $PIPBIN install --upgrade -r $TRAVIS_BUILD_DIR/requirements-dev.txt
 
   # Package directory  

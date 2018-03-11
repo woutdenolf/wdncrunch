@@ -31,8 +31,8 @@ environment:
 # Before clone
 init:
     - ps: |
-      Write-Host "Build worker environment variables:" -ForegroundColor Magenta
-      Get-ChildItem Env: | %{"{0}={1}" -f $_.Name,$_.Value}
+          Write-Host "Build worker environment variables:" -ForegroundColor Magenta
+          Get-ChildItem Env: | %{"{0}={1}" -f $_.Name,$_.Value}
     - cmd: SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
     - cmd: mkdir -p %CACHED_FOLDER%
     - cmd: mkdir -p %BUILD_FOLDER%
@@ -54,22 +54,22 @@ build_script:
     - cmd: cd %APPVEYOR_BUILD_FOLDER%
 
     # Print Python info
-    - cmd: %PYTHONBIN% ci\\info_platform.py
-    - cmd: %PIPBIN% list
+    - cmd: "%PYTHONBIN% ci\\info_platform.py"
+    - cmd: "%PIPBIN% list"
 
     # Build package
-    - cmd: %PYTHONBIN% setup.py build
-    - cmd: %PYTHONBIN% setup.py bdist_wheel bdist_msi
+    - cmd: "%PYTHONBIN% setup.py build"
+    - cmd: "%PYTHONBIN% setup.py bdist_wheel bdist_msi"
     - ps: ls dist
 
     # Install package
-    - cmd: %PIPBIN% install --pre --no-index --find-links=dist/ %APPVEYOR_PROJECT_NAME%
+    - cmd: "%PIPBIN% install --pre --no-index --find-links=dist/ %APPVEYOR_PROJECT_NAME%"
 
 test_script:
 
     # Test installation
     - cmd: cd %HOMEDRIVE%%HOMEPATH%
-    - cmd: %PYTHONBIN% -m %APPVEYOR_PROJECT_NAME%.tests.test_all
+    - cmd: "%PYTHONBIN% -m %APPVEYOR_PROJECT_NAME%.tests.test_all"
     - cmd: cd %APPVEYOR_BUILD_FOLDER%
 
 artifacts:
