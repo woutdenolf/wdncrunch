@@ -57,8 +57,8 @@ build_script:
 
     # Print Python info
     - cmd: "%PYTHONBIN% ci\\info_platform.py"
-    - cmd: echo %PIPBIN%
-    - ps: invoke-expression "%PIPBIN% list --format=columns"
+    - ps: write-host $PIPBIN
+    - ps: invoke-expression "$PIPBIN list --format=columns"
 
     # Build package
     - cmd: "%PYTHONBIN% setup.py build"
