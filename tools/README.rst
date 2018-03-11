@@ -13,6 +13,7 @@ Configure git
 
     git config --global user.name githubname
     git config --global user.email user@domain
+    git config --global core.autocrlf true
     git config --global user.signingkey YOURMASTERKEYID
 
 The signing key is only needed by project managers to sign tags and PyPi releases (see `signing  <localrefsigning_>`_). Other contributors only need to concern themselves with pull-requests on Github (see `contribute  <localrefcontribute_>`_).

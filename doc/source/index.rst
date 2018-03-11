@@ -7,11 +7,15 @@ The wdncrunch package provides a template for a python project with CI and docum
 .. toctree::
    :hidden:
 
-   modules/index
+   tutorials/index
+   modules
    changelog
 
-:doc:`modules/index`
-    Documentation of the packages included in *wdncrunch*
+:doc:`tutorials/index`
+    Some examples on how to use the library
+    
+:doc:`modules`
+    API documentation of the packages included in *wdncrunch*
 
 :doc:`changelog`
     List of changes between releases

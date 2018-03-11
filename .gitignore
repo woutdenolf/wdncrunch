@@ -4,7 +4,8 @@
 build
 dist
 *.egg*
+doc/source/_autosummary
 
 # Temporary files
 *~
-
+.[^.]*
