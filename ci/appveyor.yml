@@ -34,24 +34,24 @@ init:
           Write-Host "Build worker environment variables:" -ForegroundColor Magenta
           Get-ChildItem Env: | %{"{0}={1}" -f $_.Name,$_.Value}
     - cmd: SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
-    - ps: mkdir -force $CACHED_FOLDER
-    - ps: mkdir -force $BUILD_FOLDER
+    - ps: mkdir -force $env:CACHED_FOLDER
+    - ps: mkdir -force $env:BUILD_FOLDER
 
 install:
 
     # Install Appveyor specific dependencies
-    - ps: cd $BUILD_FOLDER
-    - ps: $APPVEYOR_BUILD_FOLDER\ci\prepare_appveyor-windows.ps1
+    - ps: cd $env:BUILD_FOLDER
+    - ps: $env:APPVEYOR_BUILD_FOLDER\ci\prepare_appveyor-windows.ps1
 
     # Install build dependencies
-    - ps: cd $BUILD_FOLDER
-    - ps: $APPVEYOR_BUILD_FOLDER\tools\prepare_install-windows.ps1 -y -u
+    - ps: cd $env:BUILD_FOLDER
+    - ps: $env:APPVEYOR_BUILD_FOLDER\tools\prepare_install-windows.ps1 -y -u
     - cmd: "%PIPBIN% install --upgrade -r %APPVEYOR_BUILD_FOLDER%/requirements-dev.txt"
 
 build_script:
 
     # Package directory  
-    - ps: $APPVEYOR_BUILD_FOLDER
+    - ps: $env:APPVEYOR_BUILD_FOLDER
 
     # Print Python info
     - cmd: "%PYTHONBIN% ci\\info_platform.py"
@@ -68,9 +68,9 @@ build_script:
 test_script:
 
     # Test installation
-    - ps: cd $HOMEDRIVE$HOMEPATH
+    - ps: cd $env:HOMEDRIVE$env:HOMEPATH
     - cmd: "%PYTHONBIN% -m %APPVEYOR_PROJECT_NAME%.tests.test_all"
-    - ps: cd $APPVEYOR_BUILD_FOLDER
+    - ps: cd $env:APPVEYOR_BUILD_FOLDER
 
 artifacts:
     # Archive the generated wheel package in the ci.appveyor.com build report.
