@@ -75,8 +75,8 @@ build_script:
 test_script:
 
     # Test installation (ps version always throws an error)
-    - ps: invoke-expression "$PYTHONBIN -m $env:APPVEYOR_PROJECT_NAME.tests.test_all"
-    #- cmd: python -m %APPVEYOR_PROJECT_NAME%.tests.test_all
+    #- ps: invoke-expression "$PYTHONBIN -m $env:APPVEYOR_PROJECT_NAME.tests.test_all"
+    - cmd: python -m %APPVEYOR_PROJECT_NAME%.tests.test_all
     - ps: cd $env:APPVEYOR_BUILD_FOLDER
 
 artifacts:
