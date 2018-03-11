@@ -75,7 +75,7 @@ test_script:
 
     # Test installation
     - ps: $_CMD = "$PYTHONBIN -m $env:APPVEYOR_PROJECT_NAME.tests.test_all"
-    - ps: %_CMD%
+    - ps: "%_CMD%"
     - ps: cd $env:APPVEYOR_BUILD_FOLDER
 
 artifacts:
