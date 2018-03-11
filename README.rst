@@ -4,12 +4,19 @@ wdncrunch: example library for python
 Getting started
 ---------------
 
-Install dependencies:
+Install dependencies on Linux (including essentials if needed):
 
 .. code-block:: bash
 
     git clone https://github.com/woutdenolf/wdncrunch
-    . wdncrunch/tools/prepare_install-linux.sh
+    . wdncrunch/tools/prepare_install-linux.sh [-u]
+
+Install dependencies on Windows (including essentials if needed):
+
+.. code-block:: bash
+
+    git clone https://github.com/woutdenolf/wdncrunch
+    wdncrunch/tools/prepare_install-windows.bat [-u]
 
 Install from PyPi:
 
@@ -62,17 +69,10 @@ To import modules from a package without installing the package, add the
 directory of the package to the PYTHONPATH environment variable or add this
 to the top of your script
 
-.. code-block::
+.. code-block:: python
 
     import sys
     sys.path.insert(1,'.../wdncrunch')
-
-
-Import as follows:
-
-.. code-block:: 
-
-    from wdncrunch.modulea.classa import classa
 
 
 .. |Travis Status Master| image:: https://travis-ci.org/woutdenolf/wdncrunch.svg?branch=master

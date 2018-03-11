@@ -56,6 +56,8 @@ build_script:
     - ps: cd $env:APPVEYOR_BUILD_FOLDER
 
     # Print Python info
+    - ps: ls
+    - ps: write-host "$PYTHONBIN ci\\info_platform.py"
     - ps: invoke-expression "$PYTHONBIN ci\\info_platform.py"
     - ps: invoke-expression "$PIPBIN list"
 

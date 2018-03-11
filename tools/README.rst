@@ -372,7 +372,7 @@ Other dependencies (including essentials) in powershell:
 
 .. code-block:: powershell
 
- .\prepare_install-linux.ps1 -h
+ .\prepare_install-windows.ps1 -h
 
 or cmd
 

@@ -40,7 +40,6 @@ if ($h) {
 
         -h              Help
        "
-    Read-Host "Press any key to exit..."
     exit
 }
 
