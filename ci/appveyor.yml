@@ -51,7 +51,8 @@ install:
     - ps: invoke-expression "$PIPBIN install --upgrade -r $env:APPVEYOR_BUILD_FOLDER/requirements-dev.txt"
 
 build_script:
-    - ps: $global:ErrorActionPreference = "Continue"
+    # For debugging purposes
+    #- ps: $global:ErrorActionPreference = "Continue"
 
     # Package directory  
     - ps: cd $env:APPVEYOR_BUILD_FOLDER
@@ -63,7 +64,7 @@ build_script:
 
     # Build package
     - ps: invoke-expression "$PYTHONBIN setup.py build"
-    - ps: invoke-expression "$PYTHONBIN setup.py bdist_wheel bdist_msi"
+    - ps: invoke-expression "$PYTHONBIN setup.py sdist bdist_wheel bdist_msi"
     - ps: ls dist
 
     # Install package
@@ -73,9 +74,10 @@ build_script:
 test_script:
 
     # Test installation
-    - ps: invoke-expression "$PYTHONBIN -m $env:APPVEYOR_PROJECT_NAME.tests.test_all 2>&1"
+    - ps: $_CMD = "$PYTHONBIN -m $env:APPVEYOR_PROJECT_NAME.tests.test_all"
+    - ps: %_CMD%
     - ps: cd $env:APPVEYOR_BUILD_FOLDER
 
 artifacts:
-    # Archive the generated wheel package in the ci.appveyor.com build report.
-    - path: dist\*
+    # Archive the generated wheels and msi
+    #- path: dist\*
