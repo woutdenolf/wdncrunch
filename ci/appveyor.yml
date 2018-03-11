@@ -19,19 +19,20 @@ environment:
         BUILD_FOLDER: "%HOMEDRIVE%%HOMEPATH%\\build"
 
     matrix:
-        - PYTHON: "C:\\Python27"
-        - PYTHON: "C:\\Python27-x64"
-        - PYTHON: "C:\\Python34"
-        - PYTHON: "C:\\Python34-x64"
-        - PYTHON: "C:\\Python35"
-        - PYTHON: "C:\\Python35-x64"
-        - PYTHON: "C:\\Python36"
-        - PYTHON: "C:\\Python36-x64"
+        - PYTHON_DIR: "C:\\Python27"
+        - PYTHON_DIR: "C:\\Python27-x64"
+        - PYTHON_DIR: "C:\\Python34"
+        - PYTHON_DIR: "C:\\Python34-x64"
+        - PYTHON_DIR: "C:\\Python35"
+        - PYTHON_DIR: "C:\\Python35-x64"
+        - PYTHON_DIR: "C:\\Python36"
+        - PYTHON_DIR: "C:\\Python36-x64"
 
 init:
 
     # Before clone
-    - ps: [Environment]::SetEnvironmentVariable("path", "$PYTHON;$PYTHON\\Scripts;$env:path", "Process")
+    - ps: |
+          [Environment]::SetEnvironmentVariable('path', '$PYTHON_DIR;$PYTHON_DIR\\Scripts;$env:path', 'process')
     - ps: mkdir -force $env:CACHED_FOLDER
     - ps: mkdir -force $env:BUILD_FOLDER
     - ps: |
