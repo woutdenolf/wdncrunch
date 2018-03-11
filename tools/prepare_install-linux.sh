@@ -26,7 +26,7 @@ SCRIPT_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source $SCRIPT_ROOT/funcs.sh
 resetEnv
 
-# ============Adapt environment based on script arguments============
+# ============Parse arguments============
 OPTIND=0
 while getopts "v:uythd" opt; do
   case $opt in
@@ -54,7 +54,25 @@ while getopts "v:uythd" opt; do
       ;;
   esac
 done
+
+# ============Initialize environment============
 initEnv
+
+cprint "Root priviliges: $SYSTEM_PRIVILIGES"
+cprint "System wide installation: $INSTALL_SYSTEMWIDE"
+
+if [[ -z $FORCECHOICE ]]; then
+    read -p "Continue (Y/n)?" CHOICE
+else
+    CHOICE=$FORCECHOICE
+fi
+case "$CHOICE" in 
+  y|Y ) ;;
+  n|N ) 
+        cd $RESTORE_WD
+        return $RETURNCODE_CANCEL;;
+  * ) ;;
+esac
 
 # ============Initialize Python============
 initPython
@@ -111,8 +129,8 @@ case "$CHOICE" in
   * ) ;;
 esac
 
-# ============Install basics============
-cprint "Install basics ..."
+# ============Install essentials============
+cprint "Install essentials ..."
 if [[ $NOTDRY == true && $SYSTEM_PRIVILIGES == true ]]; then
     mexec "apt-get -y install make build-essential git"
 fi
@@ -121,22 +139,20 @@ BUILDSTEP=$(( $BUILDSTEP+1 ))
 BUILDSTEPS=$(( $BUILDSTEPS+1 ))
 
 # ============Install system dependencies============
-cprint "Install python module dependencies ..."
+cprint "Install system dependencies ..."
 if [[ $SYSTEM_PRIVILIGES == true ]]; then
     if [[ $NOTDRY == true ]]; then
-        mexec "apt-get -y ...."
+        #mexec "apt-get -y ...."
     fi
     BUILDSTEP=$(( $BUILDSTEP+1 ))
     BUILDSTEPS=$(( $BUILDSTEPS+1 ))
 fi
-
 
 # ============Install modules============
 cprint "Install python modules available on pypi..."
 if [[ $NOTDRY == true ]]; then
     $PIPBIN install --upgrade setuptools
     $PIPBIN install --upgrade wheel
-
     $PIPBIN install --upgrade -r $SCRIPT_ROOT/../requirements.txt
 fi
 

@@ -56,20 +56,36 @@ if (!(YesNoQuestion "Continue installation?")) {
 }
 
 # ============Build essentials============
+cprint "Install essentials ..."
 . $PSScriptRoot\install-python.ps1
 . $PSScriptRoot\install-pip.ps1
 . $PSScriptRoot\install-git.ps1
-. $PSScriptRoot\install-pandoc.ps1
 
-# ============Show info and ask for coninuation============
+# ============Show info and ask for continuation============
 cprint "Python: $PYTHONBIN"
 cprint "Python version: $PYTHONFULLV"
 cprint "Python location: $PYTHON_EXECUTABLE"
 cprint "Python include: $PYTHON_INCLUDE_DIR"
 cprint "Python library: $PYTHON_LIBRARY"
 cprint "Pip: $PIPFULLV" 
-#cprint "Prefix for dependencies: $SPECTROCRUNCHLOCAL"
-#cprint "Opt directory: $SPECTROCRUNCHOPT"
+if (!(YesNoQuestion "Continue installation?")) {
+    exit
+}
+
+# ============Install system dependencies============
+cprint "Install system dependencies ..."
+. $PSScriptRoot\install-pandoc.ps1
+
+# ============Install modules============
+cprint "Install python modules available on pypi..."
+if ($NOTDRY) {
+    invoke-expression "$PIPBIN install --upgrade setuptools"
+    invoke-expression "$PIPBIN install --upgrade wheel"
+    invoke-expression "$PIPBIN install --upgrade -r $PSScriptRoot/../requirements-dev.txt"
+}
+
+# ============Custom installation============
+cprint "Install python modules not available on pypi..."
 
 # ============Cleanup============
 #Read-Host "Press any key to exit..."

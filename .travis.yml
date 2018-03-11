@@ -43,17 +43,18 @@ install:
   # Install general build dependencies
   - cd $BUILD_FOLDER
   - if [ ${TRAVIS_OS_NAME:-'linux'} = 'linux' ]; then . $TRAVIS_BUILD_DIR/tools/prepare_install-linux.sh -y -u; fi
+  - $PIPBIN install --upgrade -r $TRAVIS_BUILD_DIR/requirements-dev.txt
 
   # Package directory  
   - cd $TRAVIS_BUILD_DIR
 
   # Print Python info
-  - $PYTHOBIN ci/info_platform.py
+  - $PYTHONBIN ci/info_platform.py
   - $PIPBIN list
 
   # Build package
-  - $PYTHOBIN setup.py build
-  - $PYTHOBIN setup.py sdist bdist_wheel
+  - $PYTHONBIN setup.py build
+  - $PYTHONBIN setup.py sdist bdist_wheel
   - ls dist
 
   # Install package
@@ -63,5 +64,5 @@ install:
 script:
   # Test the installed package
   - cd $HOME
-  - $PYTHOBIN -m $PROJECTNAME.tests.test_all
+  - $PYTHONBIN -m $PROJECTNAME.tests.test_all
 

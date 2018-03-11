@@ -19,12 +19,13 @@ environment:
         BUILD_FOLDER: "%HOMEDRIVE%%HOMEPATH%\\build"
 
     matrix:
+        - PYTHON: "C:\\Python27"
         - PYTHON: "C:\\Python27-x64"
-
+        - PYTHON: "C:\\Python34"
         - PYTHON: "C:\\Python34-x64"
-
+        - PYTHON: "C:\\Python35"
         - PYTHON: "C:\\Python35-x64"
-
+        - PYTHON: "C:\\Python36"
         - PYTHON: "C:\\Python36-x64"
 
 # Before clone
@@ -32,7 +33,6 @@ init:
     - ps: |
       Write-Host "Build worker environment variables:" -ForegroundColor Magenta
       Get-ChildItem Env: | %{"{0}={1}" -f $_.Name,$_.Value}
-
     - cmd: SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
     - cmd: mkdir -p %CACHED_FOLDER%
     - cmd: mkdir -p %BUILD_FOLDER%
@@ -46,6 +46,7 @@ install:
     # Install build dependencies
     - cmd: cd %BUILD_FOLDER%
     - ps: $APPVEYOR_BUILD_FOLDER/tools/prepare_install-windows.ps1 -y -u
+    - cmd: $PIPBIN install --upgrade -r %APPVEYOR_BUILD_FOLDER%/requirements-dev.txt
 
 build_script:
 
