@@ -65,7 +65,8 @@ build_script:
 
     # Build package
     - ps: invoke-expression "$PYTHONBIN setup.py build"
-    - ps: invoke-expression "$PYTHONBIN setup.py build_doc"
+    #- ps: invoke-expression "$PYTHONBIN setup.py build_doc"
+    - cmd: python setup.py build_doc
     - ps: ls build
     - ps: invoke-expression "$PYTHONBIN setup.py sdist bdist_wheel bdist_msi"
     - ps: ls dist
