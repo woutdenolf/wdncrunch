@@ -28,14 +28,15 @@ environment:
         - PYTHON: "C:\\Python36"
         - PYTHON: "C:\\Python36-x64"
 
-# Before clone
 init:
+
+    # Before clone
+    - ps: [Environment]::SetEnvironmentVariable("path", "$PYTHON;$PYTHON\\Scripts;$env:path", "Process")
+    - ps: mkdir -force $env:CACHED_FOLDER
+    - ps: mkdir -force $env:BUILD_FOLDER
     - ps: |
           Write-Host "Build worker environment variables:" -ForegroundColor Magenta
           Get-ChildItem Env: | %{"{0}={1}" -f $_.Name,$_.Value}
-    - cmd: SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
-    - ps: mkdir -force $env:CACHED_FOLDER
-    - ps: mkdir -force $env:BUILD_FOLDER
 
 install:
 
@@ -46,7 +47,7 @@ install:
     # Install build dependencies
     - ps: cd $env:BUILD_FOLDER
     - ps: invoke-expression "$env:APPVEYOR_BUILD_FOLDER\tools\prepare_install-windows.ps1 -y -u"
-    - cmd: "%PIPBIN% install --upgrade -r %APPVEYOR_BUILD_FOLDER%/requirements-dev.txt"
+    - ps: invoke-expression "$PIPBIN install --upgrade -r $env:APPVEYOR_BUILD_FOLDER/requirements-dev.txt"
 
 build_script:
 
@@ -54,22 +55,22 @@ build_script:
     - ps: $env:APPVEYOR_BUILD_FOLDER
 
     # Print Python info
-    - cmd: "%PYTHONBIN% ci\\info_platform.py"
-    - cmd: "%PIPBIN% list"
+    - ps: invoke-expression "$PYTHONBIN ci\\info_platform.py"
+    - ps: invoke-expression "$PIPBIN list"
 
     # Build package
-    - cmd: "%PYTHONBIN% setup.py build"
-    - cmd: "%PYTHONBIN% setup.py bdist_wheel bdist_msi"
+    - ps: invoke-expression "$PYTHONBIN setup.py build"
+    - ps: invoke-expression "$PYTHONBIN setup.py bdist_wheel bdist_msi"
     - ps: ls dist
 
     # Install package
-    - cmd: "%PIPBIN% install --pre --no-index --find-links=dist/ %APPVEYOR_PROJECT_NAME%"
+    - ps: invoke-expression "$PIPBIN install --pre --no-index --find-links=dist/ $env:APPVEYOR_PROJECT_NAME"
 
 test_script:
 
     # Test installation
     - ps: cd $env:HOMEDRIVE$env:HOMEPATH
-    - cmd: "%PYTHONBIN% -m %APPVEYOR_PROJECT_NAME%.tests.test_all"
+    - ps: invoke-expression "$PYTHONBIN -m $env:APPVEYOR_PROJECT_NAME.tests.test_all"
     - ps: cd $env:APPVEYOR_BUILD_FOLDER
 
 artifacts:
