@@ -36,5 +36,7 @@ if __name__ == '__main__':
 
     mysuite = test_suite_all()
     runner = unittest.TextTestRunner()
-    if not runner.run(mysuite).wasSuccessful():
+    if runner.run(mysuite).wasSuccessful():
+        sys.exit(0)
+    else:
         sys.exit(1)

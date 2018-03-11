@@ -51,8 +51,9 @@ install:
     - ps: invoke-expression "$PIPBIN install --upgrade -r $env:APPVEYOR_BUILD_FOLDER/requirements-dev.txt"
 
 build_script:
-    # For debugging purposes
+    # Error handling
     #- ps: $global:ErrorActionPreference = "Continue"
+    - ps: $global:ErrorActionPreference = "Stop"
 
     # Package directory  
     - ps: cd $env:APPVEYOR_BUILD_FOLDER
@@ -73,8 +74,9 @@ build_script:
 
 test_script:
 
-    # Test installation (cannot make it work with invoke-expression "$PYTHONBIN ...")
-    - ps: python -m $env:APPVEYOR_PROJECT_NAME.tests.test_all
+    # Test installation (ps version always throws an error)
+    - ps: invoke-expression "$PYTHONBIN -m $env:APPVEYOR_PROJECT_NAME.tests.test_all"
+    #- cmd: python -m %APPVEYOR_PROJECT_NAME%.tests.test_all
     - ps: cd $env:APPVEYOR_BUILD_FOLDER
 
 artifacts:
