@@ -73,7 +73,7 @@ build_script:
 test_script:
 
     # Test installation
-    - ps: invoke-expression "$PYTHONBIN -m $env:APPVEYOR_PROJECT_NAME.tests.test_all 2> $null"
+    - ps: invoke-expression "$PYTHONBIN -m $env:APPVEYOR_PROJECT_NAME.tests.test_all 2>&1"
     - ps: cd $env:APPVEYOR_BUILD_FOLDER
 
 artifacts:
