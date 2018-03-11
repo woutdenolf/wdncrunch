@@ -1,17 +1,7 @@
 Guide for developers
 ====================
-
-1. `Configure your local git.  <localrefconfiggit_>`_
-
-2. `Contribute.  <localrefcontribute_>`_
-
-3. `Check whether a branch can be released. <localrefreleasable_>`_
-
-4. `Increase the version number.  <localrefincversion_>`_
-
-5. `Release and deploy. <localrefreleaseversion_>`_
-
-6. `Start a project. <localrefstart_>`_
+.. sectnum::
+.. contents::
 
 
 .. _localrefconfiggit:
@@ -90,8 +80,8 @@ Assuming you forked the project on Github, then your fork will be referred to as
 
 .. _localrefincversion:
 
-Increase the version
---------------------
+Bump version
+------------
 
 1. Get the master
 
@@ -127,6 +117,32 @@ Increase the version
    head fork: forkuser/${PROJECT} (origin)
 
    compare: v1.2.3
+
+
+.. _localrefversion:
+
+Version number
+++++++++++++++
+
+`Semantic versioning <http://semver.org/>`_ is followed::
+
+  MAJOR.MINOR.MICRO.SERIAL
+
+  SERIAL: bump when changes not to the code
+  MICRO : bump when bug fix is done
+               when bumping SERIAL == 15
+  MINOR : bump when API changes backwards compatible
+               when new functionality is added
+               when bumping MICRO == 15
+  MAJOR : bump when API changes not backwards compatible
+ 
+  Always reset the lower numbers to 0.
+
+  dev   : not tested
+  alpha : begin testing
+  beta  : feature complete
+  rc    : test complete
+  final : stable version
 
 
 .. _localrefreleaseversion:
@@ -167,28 +183,34 @@ Release and deploy
 
 .. _localrefreleasable:
 
-Check branch releasable
------------------------
+Build
++++++
 
-1. Create a clean `sandbox <localrefsandbox_>`_ and make a fresh git clone
-
-2. Release directory
+1. Install build requirements
 
 .. code-block:: bash
   
+  pip install --upgrade -r requirements-dev.txt
+
+2. Create a clean `sandbox <localrefsandbox_>`_ and make a fresh git clone.
+
+3. Create release directory
+
+.. code-block:: bash
+
   export RELEASEDIR=...
   export VERSION=`python -c "from _version import strictversion as version;print(\"{}\".format(version));"`
   rm -r ${RELEASEDIR}
   mkdir -p ${RELEASEDIR}/dist
 
-3. Build the source tarball
+4. Build the source tarball
 
 .. code-block:: bash
   
   python setup.py clean sdist
   cp dist/${PROJECT}-${VERSION}.tar.gz ${RELEASEDIR}/dist
 
-4. Test the source
+5. Test the source
 
 .. code-block:: bash
   
@@ -197,31 +219,30 @@ Check branch releasable
   pip install .
   python -m ${PROJECT}.tests.test_all
   
-5. Release the docs
+6. Release the docs
 
 .. code-block:: bash
   
-  pip install sphinx
   python setup.py clean build_doc
   pip uninstall -y ${PROJECT}
   cd build/sphinx/html
   zip -r ${RELEASEDIR}/html_doc.zip .
   cd ../../..
 
-6. Inspect the docs
+7. Inspect the docs
 
 .. code-block:: bash
   
   firefox build/sphinx/html/index.html
 
-7. Build the wheels (do this on different platforms)
+8. Build the wheels (do this on different platforms)
 
 .. code-block:: bash
   
   python setup.py clean bdist_wheel --universal
   cp dist/${PROJECT}-${VERSION}-py2.py3-none-any.whl ${RELEASEDIR}/dist
 
-8. Test the wheels
+9. Test the wheels
 
 .. code-block:: bash
   
@@ -229,13 +250,13 @@ Check branch releasable
   python -m ${PROJECT}.tests.test_all
   pip uninstall -y ${PROJECT}
 
-9. Delete the `sandbox  <localrefsandbox_>`_
+10. Delete the `sandbox  <localrefsandbox_>`_
 
 
 .. _localrefdeployment:
 
 Deployment
-----------
+++++++++++
 
 Add PyPi credentials file ~/.pypirc (chmod 600):
 
@@ -267,7 +288,7 @@ Register project (already done):
 .. _localrefsandbox:
 
 Sandbox
--------
++++++++
 
 * Using `virtualenv <https://virtualenv.pypa.io/>`_
 
@@ -318,34 +339,16 @@ Manage virtualenvs
   pyenv virtualenvs
 
 
-.. _localrefversion:
+Install dependencies
+--------------------
 
-Versioning
-----------
+Only the dependencies on PyPi:
 
-`Semantic versioning <http://semver.org/>`_ is followed::
+.. code-block:: bash
+   
+   pip install --upgrade -r requirements.txt
 
-  MAJOR.MINOR.MICRO.SERIAL
-
-  SERIAL: bump when changes not to the code
-  MICRO : bump when bug fix is done
-               when bumping SERIAL == 15
-  MINOR : bump when API changes backwards compatible
-               when new functionality is added
-               when bumping MICRO == 15
-  MAJOR : bump when API changes not backwards compatible
- 
-  Always reset the lower numbers to 0.
-
-  dev   : not tested
-  alpha : begin testing
-  beta  : feature complete
-  rc    : test complete
-  final : stable version
-
-
-Install external dependencies
------------------------------
+All dependencies:
 
 .. code-block:: bash
 
@@ -460,9 +463,7 @@ Start a project
     git push origin genesis
 
 6. Github configuration
-    * Add description
-    * Add license
-    * Register with CI services
-
-
+    - Add description
+    - Add license
+    - Register with CI services
 
