@@ -143,6 +143,7 @@ cprint "Install system dependencies ..."
 if [[ $SYSTEM_PRIVILIGES == true ]]; then
     if [[ $NOTDRY == true ]]; then
         #mexec "apt-get -y ...."
+        cprint "Nothing to do"
     fi
     BUILDSTEP=$(( $BUILDSTEP+1 ))
     BUILDSTEPS=$(( $BUILDSTEPS+1 ))
