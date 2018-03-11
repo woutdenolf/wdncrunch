@@ -380,8 +380,7 @@ or cmd
 
  prepare_install-linux.bat -h
 
-To create your own installers, use `lessmsi <https://github.com/activescott/lessmsi>` to investigate msi command line arguments (Table view > Property).
-
+To create your own install scripts, use `lessmsi <https://github.com/activescott/lessmsi>`_ to investigate msi command line arguments (Table view > Property).
 
 
 Help
