@@ -53,10 +53,9 @@ install:
 build_script:
 
     # Package directory  
-    - ps: $env:APPVEYOR_BUILD_FOLDER
+    - ps: cd $env:APPVEYOR_BUILD_FOLDER
 
     # Print Python info
-    - ps: ls 
     - ps: invoke-expression "$PYTHONBIN ci\\info_platform.py"
     - ps: invoke-expression "$PIPBIN list"
 
