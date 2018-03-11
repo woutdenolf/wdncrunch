@@ -30,6 +30,9 @@ PROJECT = 'wdncrunch'
 import sys
 import subprocess
 import os
+import shutil
+import glob
+import fnmatch
 
 from setuptools import setup
 from setuptools import find_packages
@@ -210,7 +213,25 @@ class CleanCommand(Command):
     def finalize_options(self):
         pass
     def run(self):
-        os.system('rm -vrf ./build ./dist ./*.pyc ./*.tgz ./*.egg-info')
+        shutil.rmtree("./build",True)
+        shutil.rmtree("./dict",True)
+        
+        patterns = ['*.egg-info','*.tgz']
+        for pattern in patterns:
+            for f in glob.glob(pattern):
+                os.remove(f)
+                
+        patterns = ['*.pyc']
+        for root, dirnames, filenames in os.walk('.'):
+            for pattern in patterns:
+                for filename in fnmatch.filter(filenames, pattern):
+                    os.remove(os.path.join(root, filename))
+
+        patterns = ['__pycache__']
+        for root, dirnames, filenames in os.walk('.'):
+            for pattern in patterns:
+                for dirname in fnmatch.filter(dirnames, pattern):
+                    shutil.rmtree(os.path.join(root, dirname),True)
 
 cmdclass['clean'] = CleanCommand
 
@@ -225,7 +246,7 @@ class NameCommand(Command):
     def finalize_options(self):
         pass
     def run(self):
-        print PROJECT
+        print(PROJECT)
 
 cmdclass['name'] = NameCommand
 
