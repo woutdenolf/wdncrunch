@@ -34,3 +34,5 @@ else:
         print("  %s" % p)
         for d in p.get_devices():
             print("    %s" % d)
+
+sys.exit(0)
