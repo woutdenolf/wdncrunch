@@ -56,8 +56,8 @@ build_script:
     - cmd: cd %APPVEYOR_BUILD_FOLDER%
 
     # Print Python info
-    - cmd: %PYTHONBIN% ci\\info_platform.py
-    - cmd: %PIPBIN% list
+    - cmd: "%PYTHONBIN% ci\\info_platform.py"
+    - cmd: "%PIPBIN% list"
 
     # Build package
     - cmd: "%PYTHONBIN% setup.py build"
@@ -71,7 +71,7 @@ test_script:
 
     # Test installation
     - cmd: cd %HOMEDRIVE%%HOMEPATH%
-    - cmd: "%PYTHONBIN% -m $env:APPVEYOR_PROJECT_NAME.tests.test_all"
+    - cmd: "%PYTHONBIN% -m %APPVEYOR_PROJECT_NAME%.tests.test_all"
     - cmd: cd %APPVEYOR_BUILD_FOLDER%
 
 artifacts:
