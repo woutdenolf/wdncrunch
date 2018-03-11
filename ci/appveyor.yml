@@ -15,80 +15,61 @@ environment:
     global:
         WIN_SDK_ROOT: "C:\\Program Files\\Microsoft SDKs\\Windows"
         VENV_NAME: "venv_build"
-
-        CACHED_FOLDER: "%LOCALAPPDATA%\\cashed"
+        CACHED_FOLDER: "%HOMEDRIVE%%HOMEPATH%\\cashed"
+        BUILD_FOLDER: "%HOMEDRIVE%%HOMEPATH%\\build"
 
     matrix:
-        # Python 2.7
-        - PYTHON_DIR: "C:\\Python27-x64"
-          PYTHON_VERSION: "2.7.11"
-          PYTHON_ARCH: "64"
-          BUILD_ARGS: ""
+        - PYTHON: "C:\\Python27-x64"
 
-        ## Python 3.4
-        #- PYTHON_DIR: "C:\\Python34-x64"
-        #  PYTHON_VERSION: "3.4.3"
-        #  PYTHON_ARCH: "64"
-        #  # OpenMP is not available on python 3.4
-        #  BUILD_ARGS: "--no-openmp"
+        - PYTHON: "C:\\Python34-x64"
 
-        ## Python 3.5
-        #- PYTHON_DIR: "C:\\Python35-x64"
-        #  PYTHON_VERSION: "3.5.0"
-        #  PYTHON_ARCH: "64"
-        #  BUILD_ARGS: ""
+        - PYTHON: "C:\\Python35-x64"
 
+        - PYTHON: "C:\\Python36-x64"
+
+# Before clone
 init:
-  - ps: |
+    - ps: |
       Write-Host "Build worker environment variables:" -ForegroundColor Magenta
       Get-ChildItem Env: | %{"{0}={1}" -f $_.Name,$_.Value}
 
+    - cmd: SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
+    - cmd: mkdir -p %CACHED_FOLDER%
+    - cmd: mkdir -p %BUILD_FOLDER%
+
 install:
-    # Add Python to PATH
-    - "SET PATH=%PYTHON_DIR%;%PYTHON_DIR%\\Scripts;%PATH%"
 
-    # Upgrade/install distribution modules
-    - "pip install --upgrade setuptools"
-    - "python -m pip install --upgrade pip"
-
-    # Install virtualenv
-    - "pip install --upgrade virtualenv"
-    - "virtualenv --version"
-
-build_script:
-    # Create build virtualenv
-    - "virtualenv --clear %VENV_NAME%"
-    - "%VENV_NAME%\\Scripts\\activate.bat"
-
-    # Configure MSVC environment
-    # Python 3.3 x64 and Python 3.4 x64 need a special configuration
-    - ps: |
-          If (($env:PYTHON_ARCH -eq "64") -And (($env:PYTHON_VERSION -Like "3.3.*") -Or ($env:PYTHON_VERSION -Like "3.4.*"))) {
-            & "C:\\Program Files\\Microsoft SDKs\\Windows\\v7.1\\Bin\\SetEnv.cmd" /x64
-          }
+    # Install Appveyor specific dependencies
+    - cmd: cd %BUILD_FOLDER%
+    - ps: .\$APPVEYOR_BUILD_FOLDER\ci\prepare_appveyor-windows.ps1
 
     # Install build dependencies
-    - "pip install -r ci/requirements_appveyor.txt --upgrade"
+    - cmd: cd %BUILD_FOLDER%
+    - ps: $APPVEYOR_BUILD_FOLDER/tools/prepare_install-windows.ps1 -y -u
+
+build_script:
+
+    # Package directory  
+    - cmd: cd %APPVEYOR_BUILD_FOLDER%
 
     # Print Python info
-    - "python ci\\info_platform.py"
-    - "pip list"
+    - cmd: %PYTHONBIN% ci\\info_platform.py
+    - cmd: %PIPBIN% list
 
-    # Build
-    - "python setup.py build %BUILD_ARGS%"
-    - "python setup.py bdist_wheel bdist_msi"
-    - ps: "ls dist"
-    - "pip install --pre --no-index --find-links=dist/ %APPVEYOR_PROJECT_NAME%"
+    # Build package
+    - cmd: %PYTHONBIN% setup.py build
+    - cmd: %PYTHONBIN% setup.py bdist_wheel bdist_msi
+    - ps: ls dist
+
+    # Install package
+    - cmd: %PIPBIN% install --pre --no-index --find-links=dist/ %APPVEYOR_PROJECT_NAME%
 
 test_script:
-    # Test installation
-    - cd %HOMEDRIVE%%HOMEPATH%
-    - "python -m %APPVEYOR_PROJECT_NAME%.tests.test_all"
-    - cd %APPVEYOR_BUILD_FOLDER%
 
-    # Leave build virtualenv
-    - "%VENV_NAME%\\Scripts\\deactivate.bat"
-    - "rmdir %VENV_NAME% /s /q"
+    # Test installation
+    - cmd: cd %HOMEDRIVE%%HOMEPATH%
+    - cmd: %PYTHONBIN% -m %APPVEYOR_PROJECT_NAME%.tests.test_all
+    - cmd: cd %APPVEYOR_BUILD_FOLDER%
 
 artifacts:
     # Archive the generated wheel package in the ci.appveyor.com build report.

@@ -349,12 +349,39 @@ Only the dependencies on PyPi:
    
    pip install --upgrade -r requirements.txt
 
-All dependencies:
+Linux
++++++
+
+Other dependencies (including essentials):
+
+.. code-block:: bash
+
+    . ${PROJECT}/tools/prepare_install-linux.sh -h
+
+For example:
 
 .. code-block:: bash
 
     . ${PROJECT}/tools/prepare_install-linux.sh [-v 3]
     if [[ $? == 0 ]]; then echo "OK"; else echo "NOT OK"; fi
+
+Windows
++++++++
+
+Other dependencies (including essentials) in powershell:
+
+.. code-block:: powershell
+
+ .\prepare_install-linux.ps1 -h
+
+or cmd
+
+.. code-block:: powershell
+
+ prepare_install-linux.bat -h
+
+To create your own installers, use `lessmsi <https://github.com/activescott/lessmsi>` to investigate msi command line arguments (Table view > Property).
+
 
 
 Help
