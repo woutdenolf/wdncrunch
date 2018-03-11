@@ -32,7 +32,7 @@ init:
 
     # Before clone
     - ps: |
-          [Environment]::SetEnvironmentVariable("path", "$PYTHON_DIR;$PYTHON_DIR\\Scripts;$env:path", "process")
+          [Environment]::SetEnvironmentVariable("path", "$env:PYTHON_DIR;$env:PYTHON_DIR\\Scripts;$env:path", "process")
     - ps: mkdir -force $env:CACHED_FOLDER
     - ps: mkdir -force $env:BUILD_FOLDER
     - ps: |
