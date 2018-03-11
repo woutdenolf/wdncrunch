@@ -74,8 +74,12 @@ build_script:
 test_script:
 
     # Test installation
-    - ps: $_CMD = "$PYTHONBIN -m $env:APPVEYOR_PROJECT_NAME.tests.test_all"
-    - cmd: "%_CMD%"
+    - ps: |
+          try {
+              invoke-expression "$PYTHONBIN -m $env:APPVEYOR_PROJECT_NAME.tests.test_all"
+          } catch {
+              throw "Unit tests failed"
+          }
     - ps: cd $env:APPVEYOR_BUILD_FOLDER
 
 artifacts:
