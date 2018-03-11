@@ -51,12 +51,13 @@ install:
     - ps: invoke-expression "$PIPBIN install --upgrade -r $env:APPVEYOR_BUILD_FOLDER/requirements-dev.txt"
 
 build_script:
+    - ps: $global:ErrorActionPreference = "Continue"
 
     # Package directory  
     - ps: cd $env:APPVEYOR_BUILD_FOLDER
 
     # Print Python info
-    - cmd: "%PYTHONBIN% ci\\info_platform.py"
+    - ps: invoke-expression "$PYTHONBIN ci\\info_platform.py"
     - ps: write-host $PIPBIN
     - ps: invoke-expression "$PIPBIN list --format=columns"
 
