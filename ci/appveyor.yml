@@ -41,11 +41,11 @@ install:
 
     # Install Appveyor specific dependencies
     - ps: cd $env:BUILD_FOLDER
-    - ps: $env:APPVEYOR_BUILD_FOLDER\ci\prepare_appveyor-windows.ps1
+    - ps: invoke-expression "$env:APPVEYOR_BUILD_FOLDER\ci\prepare_appveyor-windows.ps1"
 
     # Install build dependencies
     - ps: cd $env:BUILD_FOLDER
-    - ps: $env:APPVEYOR_BUILD_FOLDER\tools\prepare_install-windows.ps1 -y -u
+    - ps: invoke-expression "$env:APPVEYOR_BUILD_FOLDER\tools\prepare_install-windows.ps1 -y -u"
     - cmd: "%PIPBIN% install --upgrade -r %APPVEYOR_BUILD_FOLDER%/requirements-dev.txt"
 
 build_script:
