@@ -295,7 +295,7 @@ Sandbox
 
 .. code-block:: bash
 
-  virtualenv test1.2.3
+  virtualenv --system-site-packages test1.2.3
   cd test1.2.3
   source bin/activate
 
