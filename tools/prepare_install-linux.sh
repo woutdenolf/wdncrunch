@@ -142,15 +142,14 @@ BUILDSTEPS=$(( $BUILDSTEPS+1 ))
 cprint "Install system dependencies ..."
 if [[ $SYSTEM_PRIVILIGES == true ]]; then
     if [[ $NOTDRY == true ]]; then
-        #mexec "apt-get -y ...."
-        cprint "Nothing to do"
+        mexec "apt-get -y install pandoc" # nbsphinx
     fi
     BUILDSTEP=$(( $BUILDSTEP+1 ))
     BUILDSTEPS=$(( $BUILDSTEPS+1 ))
 fi
 
-# ============Install modules============
-cprint "Install python modules available on pypi..."
+# ============Install python packages============
+cprint "Install python packages available on pypi..."
 if [[ $NOTDRY == true ]]; then
     $PIPBIN install --upgrade setuptools
     $PIPBIN install --upgrade wheel
@@ -161,7 +160,7 @@ BUILDSTEP=$(( $BUILDSTEP+1 ))
 BUILDSTEPS=$(( $BUILDSTEPS+1 ))
 
 # ============Custom installation============
-cprint "Install python modules not available on pypi..."
+cprint "Install python packages not available on pypi..."
 
 # ============Cleanup============
 cprint "Cleaning up ..."
