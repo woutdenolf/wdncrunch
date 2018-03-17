@@ -1,3 +1,7 @@
+# 
+# This script will install all Python and system dependencies.
+# 
+
 # ============Parse arguments============
 param(
     [Parameter(Mandatory=$false)]
@@ -40,7 +44,7 @@ if ($h) {
 
         -h              Help
        "
-    exit
+  exit
 }
 
 # ============Initialize environment============

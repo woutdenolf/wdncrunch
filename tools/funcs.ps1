@@ -38,6 +38,108 @@ function cmd_exists($cmdName) {
 }
 
 
+# Initialize python variables
+function _initPythonPipEnv($reset) {
+
+    if ($PYTHONVREQUEST -eq $null) {
+        $global:PYTHONVREQUEST = -1
+    }
+
+    # Find requested version of python
+    if ($reset -or !(CorrectPythonVersion)) {
+        $global:PYTHONBIN = $null
+
+        if ((cmd_exists python) -and ($PYTHONBIN -eq $null)) {
+            $global:PYTHONBIN = "python"
+            if (!(CorrectPythonVersion)) {
+                $global:PYTHONBIN = $null
+            }
+        }
+
+        if ((cmd_exists py) -and ($PYTHONBIN -eq $null)) {
+            $global:PYTHONBIN = "py"
+            $major,$minor,$micro = parseVersion $PYTHONVREQUEST
+            if ($major -ne -1) {$global:PYTHONBIN += " -$major"}
+            if ($minor -ne -1) {$global:PYTHONBIN += ".$minor"}
+            if ($micro -ne -1) {$global:PYTHONBIN += ".$micro"}
+
+            if (!(CorrectPythonVersion)) {
+                $global:PYTHONBIN = $null
+            }
+        }
+    }
+
+    # Find requested pip
+    if ($reset -or !(CorrectPipVersion)) {
+        $global:PIPBIN = $null
+        if (CorrectPythonVersion) {
+            $global:PIPBIN = "$PYTHONBIN -m pip"
+        }
+    }
+
+    # Python info
+    if (cmd_exists $PYTHONBIN) {
+        $global:PYTHONMAJORV = invoke-expression "$PYTHONBIN -c `"import sys;print(sys.version_info[0])`""
+        $global:PYTHONV = invoke-expression "$PYTHONBIN -c `"import sys;t='{v[0]}.{v[1]}'.format(v=list(sys.version_info[:2]));print(t)`""
+        $global:PYTHONFULLV = invoke-expression "$PYTHONBIN -c `"import sys;t='{v[0]}.{v[1]}.{v[2]}'.format(v=list(sys.version_info[:3]));print(t)`""
+
+        $global:PYTHON_EXECUTABLE = (Get-Command ([string]$PYTHONBIN.split(' ')[0]) | Select-Object -ExpandProperty Definition)
+    
+        $global:PYTHON_INCLUDE_DIR = invoke-expression "$PYTHONBIN -c `"import distutils.sysconfig; print(distutils.sysconfig.get_python_inc());`""
+        $global:PYTHON_LIBRARY = invoke-expression "$PYTHONBIN -c `"import distutils.sysconfig,os;f=distutils.sysconfig.get_config_var; a=f('LIBDIR');b=f('LDLIBRARY');print(os.path.join(a if a else '',b if b else ''));`""
+        #$global:PYTHON_PKG_DIR = invoke-expression "$PYTHONBIN -c `"import distutils.sysconfig; print(distutils.sysconfig.get_python_lib());`""
+    } else {
+        $global:PYTHONMAJORV = $null
+        $global:PYTHONV = $null
+        $global:PYTHONFULLV = $null
+
+        $global:PYTHON_EXECUTABLE = $null
+    
+        $global:PYTHON_INCLUDE_DIR = $null
+        $global:PYTHON_LIBRARY = $null
+        #$global:PYTHON_PKG_DIR = $null
+    }
+
+    # Pip info
+    if (cmd_exists $PIPBIN) {
+        $global:PIPFULLV = (invoke-expression "$PIPBIN --version")
+    } else {
+        $global:PIPFULLV = $false
+    }
+}
+
+# Check Python version
+function CorrectPythonVersion() {
+    if ($PYTHONVREQUEST -eq $null) {
+        $global:PYTHONVREQUEST = -1
+    }
+    if (!(cmd_exists $PYTHONBIN)) {
+        return $false
+    }
+
+    $versioni = invoke-expression "$PYTHONBIN -c `"import sys;t='{v[0]}.{v[1]}.{v[2]}'.format(v=list(sys.version_info[:3]));print(t)`""
+    $majori,$minori,$microi = parseVersion $versioni
+    $major,$minor,$micro = parseVersion $PYTHONVREQUEST
+    $iscorrectmajor = ($major -eq -1) -or ($majori -eq $major)
+    $iscorrectminor = ($minor -eq -1) -or ($minori -eq $minor)
+    $iscorrectmicro = ($micro -eq -1) -or ($microi -eq $micro)
+
+    return $iscorrectmajor -and $iscorrectminor -and $iscorrectmicro
+}
+
+# Check pip version
+function CorrectPipVersion () {
+    if (!(cmd_exists $PIPBIN)) {
+        return $false
+    }
+
+    # Perl installations also have a pip
+    foreach ($tmp in (invoke-expression "$PIPBIN -h")) {
+        if ($tmp.contains("python")) {return $true}
+    }
+    return $false
+}
+
 # Initialize common variables
 function _initEnv($reset) {
 
@@ -76,65 +178,7 @@ function _initEnv($reset) {
     }
 
     # ============Python/Pip============
-    if ($PYTHONVREQUEST -eq $null) {
-        $global:PYTHONVREQUEST = -1
-    }
-    if ($reset -or !(CorrectPythonVersion)) {
-        $global:PYTHONBIN = $null
-
-        if ((cmd_exists python) -and ($PYTHONBIN -eq $null)) {
-            $global:PYTHONBIN = "python"
-            if (!(CorrectPythonVersion)) {
-                $global:PYTHONBIN = $null
-            }
-        }
-
-        if ((cmd_exists py) -and ($PYTHONBIN -eq $null)) {
-            $global:PYTHONBIN = "py"
-            $major,$minor,$micro = parseVersion $PYTHONVREQUEST
-            if ($major -ne -1) {$global:PYTHONBIN += " -$major"}
-            if ($minor -ne -1) {$global:PYTHONBIN += ".$minor"}
-            if ($micro -ne -1) {$global:PYTHONBIN += ".$micro"}
-
-            if (!(CorrectPythonVersion)) {
-                $global:PYTHONBIN = $null
-            }
-        }
-        
-    }
-    if ($reset -or !(CorrectPipVersion)) {
-        $global:PIPBIN = $null
-        if (CorrectPythonVersion) {
-            $global:PIPBIN = "$PYTHONBIN -m pip"
-        }
-    }
-    if (cmd_exists $PYTHONBIN) {
-        $global:PYTHONMAJORV = invoke-expression "$PYTHONBIN -c `"import sys;print(sys.version_info[0])`""
-        $global:PYTHONV = invoke-expression "$PYTHONBIN -c `"import sys;t='{v[0]}.{v[1]}'.format(v=list(sys.version_info[:2]));print(t)`""
-        $global:PYTHONFULLV = invoke-expression "$PYTHONBIN -c `"import sys;t='{v[0]}.{v[1]}.{v[2]}'.format(v=list(sys.version_info[:3]));print(t)`""
-
-        $global:PYTHON_EXECUTABLE = (Get-Command ([string]$PYTHONBIN.split(' ')[0]) | Select-Object -ExpandProperty Definition)
-    
-        $global:PYTHON_INCLUDE_DIR = invoke-expression "$PYTHONBIN -c `"import distutils.sysconfig; print(distutils.sysconfig.get_python_inc());`""
-        $global:PYTHON_LIBRARY = invoke-expression "$PYTHONBIN -c `"import distutils.sysconfig,os;f=distutils.sysconfig.get_config_var; a=f('LIBDIR');b=f('LDLIBRARY');print(os.path.join(a if a else '',b if b else ''));`""
-        #$global:PYTHON_PKG_DIR = invoke-expression "$PYTHONBIN -c `"import distutils.sysconfig; print(distutils.sysconfig.get_python_lib());`""
-    } else {
-        $global:PYTHONMAJORV = $null
-        $global:PYTHONV = $null
-        $global:PYTHONFULLV = $null
-
-        $global:PYTHON_EXECUTABLE = $null
-    
-        $global:PYTHON_INCLUDE_DIR = $null
-        $global:PYTHON_LIBRARY = $null
-        #$global:PYTHON_PKG_DIR = $null
-    }
-
-    if (cmd_exists $PIPBIN) {
-        $global:PIPFULLV = (invoke-expression "$PIPBIN --version")
-    } else {
-        $global:PIPFULLV = $false
-    }
+    _initPythonPipEnv($reset)
 
     # ============Installation progress============
     if ($NOTDRY -eq $null) {
@@ -265,39 +309,6 @@ function parseVersion([string]$versionin) {
     }
     return $major,$minor,$micro
 }
-
-# Check Python version
-function CorrectPythonVersion() {
-    if ($PYTHONVREQUEST -eq $null) {
-        $global:PYTHONVREQUEST = -1
-    }
-    if (!(cmd_exists $PYTHONBIN)) {
-        return $false
-    }
-
-    $versioni = invoke-expression "$PYTHONBIN -c `"import sys;t='{v[0]}.{v[1]}.{v[2]}'.format(v=list(sys.version_info[:3]));print(t)`""
-    $majori,$minori,$microi = parseVersion $versioni
-    $major,$minor,$micro = parseVersion $PYTHONVREQUEST
-    $iscorrectmajor = ($major -eq -1) -or ($majori -eq $major)
-    $iscorrectminor = ($minor -eq -1) -or ($minori -eq $minor)
-    $iscorrectmicro = ($micro -eq -1) -or ($microi -eq $micro)
-
-    return $iscorrectmajor -and $iscorrectminor -and $iscorrectmicro
-}
-
-# Check pip version
-function CorrectPipVersion () {
-    if (!(cmd_exists $PIPBIN)) {
-        return $false
-    }
-
-    # Perl installations also have a pip
-    foreach ($tmp in (invoke-expression "$PIPBIN -h")) {
-        if ($tmp.contains("python")) {return $true}
-    }
-    return $false
-}
-
 
 # ============Downloading============
 $webclient = New-Object System.Net.WebClient
