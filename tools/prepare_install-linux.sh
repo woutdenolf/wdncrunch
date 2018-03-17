@@ -1,6 +1,6 @@
 #!/bin/bash
 # 
-# This script will install all Python 2 and 3 dependencies.
+# This script will install all Python and system dependencies.
 # 
 
 # ============Usage============
@@ -143,6 +143,7 @@ cprint "Install system dependencies ..."
 if [[ $SYSTEM_PRIVILIGES == true ]]; then
     if [[ $NOTDRY == true ]]; then
         mexec "apt-get -y install pandoc" # nbsphinx
+        #mexec "apt-get -y install $PYTHONBINAPT-qt4" 
     fi
     BUILDSTEP=$(( $BUILDSTEP+1 ))
     BUILDSTEPS=$(( $BUILDSTEPS+1 ))
@@ -184,5 +185,3 @@ fi
 
 ELAPSED_TIME=$(($SECONDS - $START_TIME))
 cprint "Total execution time = $(( $ELAPSED_TIME/60 )) min"
-
-
