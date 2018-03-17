@@ -2,7 +2,6 @@
 . $PSScriptRoot\..\funcs.ps1
 initEnv
 
-
 # Get a hashtree with download links for each version
 function pythonVersions() {
     if (install_64bit){

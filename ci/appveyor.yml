@@ -52,8 +52,8 @@ install:
 
 build_script:
     # Error handling
-    #- ps: $global:ErrorActionPreference = "Continue"
-    - ps: $global:ErrorActionPreference = "Stop"
+    - ps: $global:ErrorActionPreference = "Continue"
+    #- ps: $global:ErrorActionPreference = "Stop"
 
     # Package directory  
     - ps: cd $env:APPVEYOR_BUILD_FOLDER

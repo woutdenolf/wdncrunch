@@ -88,6 +88,8 @@ function _initPythonPipEnv($reset) {
         $global:PYTHON_INCLUDE_DIR = invoke-expression "$PYTHONBIN -c `"import distutils.sysconfig; print(distutils.sysconfig.get_python_inc());`""
         $global:PYTHON_LIBRARY = invoke-expression "$PYTHONBIN -c `"import distutils.sysconfig,os;f=distutils.sysconfig.get_config_var; a=f('LIBDIR');b=f('LDLIBRARY');print(os.path.join(a if a else '',b if b else ''));`""
         #$global:PYTHON_PKG_DIR = invoke-expression "$PYTHONBIN -c `"import distutils.sysconfig; print(distutils.sysconfig.get_python_lib());`""
+        
+        $global:PYTHON_COMPILER = invoke-expression "$PYTHONBIN -c `"import sys,re; print(re.search('\[(.*)\]',sys.version).groups()[0])`""
     } else {
         $global:PYTHONMAJORV = $null
         $global:PYTHONV = $null
@@ -98,6 +100,8 @@ function _initPythonPipEnv($reset) {
         $global:PYTHON_INCLUDE_DIR = $null
         $global:PYTHON_LIBRARY = $null
         #$global:PYTHON_PKG_DIR = $null
+
+        $global:PYTHON_COMPILER = $null
     }
 
     # Pip info
@@ -124,7 +128,9 @@ function CorrectPythonVersion() {
     $iscorrectminor = ($minor -eq -1) -or ($minori -eq $minor)
     $iscorrectmicro = ($micro -eq -1) -or ($microi -eq $micro)
 
-    return $iscorrectmajor -and $iscorrectminor -and $iscorrectmicro
+    $systemtarget = invoke-expression "$PYTHONBIN -c `"import sys,math;int(math.log(sys.maxsize,2)+1)`""
+
+    return $iscorrectmajor -and $iscorrectminor -and $iscorrectmicro -and ($systemtarget -eq $global:SYSTEM_TARGET)
 }
 
 # Check pip version
