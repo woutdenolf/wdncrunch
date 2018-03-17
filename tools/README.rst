@@ -97,7 +97,7 @@ Bump version
   
   echo `python -c "from _version import version;print(\"v{}\".format(version));"`
 
-3. Check whether the branch can be build (:ref:`local-ref-releasable`)
+3. Check whether the branch can be build (:ref:`local-ref-build`)
 
 4. Commit and tag new version
 
@@ -159,7 +159,7 @@ Release and deploy
   git pull upstream master
   git checkout v1.2.3
 
-2. Build the branch (:ref:`local-ref-releasable`). Increase the version number when something needed fixing (:ref:`local-ref-incversion`).
+2. Build the branch (:ref:`local-ref-build`). Increase the version number when something needed fixing (:ref:`local-ref-incversion`).
 
 3. Create a release on Github based on the tag
 
@@ -222,7 +222,7 @@ Build
 
 .. code-block:: bash
 
-  tar zxvf ${RELEASEDIR}/dist/${PROJECT}-${VERSION}.tar.gz
+  tar -zxvf ${RELEASEDIR}/dist/${PROJECT}-${VERSION}.tar.gz
   cd ${PROJECT}-${VERSION}
   python setup.py clean build_doc
   cd build/sphinx/html
@@ -238,9 +238,9 @@ Build
 
 .. code-block:: bash
   
-  tar zxvf ${RELEASEDIR}/dist/${PROJECT}-${VERSION}.tar.gz
+  tar -zxvf ${RELEASEDIR}/dist/${PROJECT}-${VERSION}.tar.gz
   cd ${PROJECT}-${VERSION}
-  python setup.py clean bdist_wheel --universal
+  python setup.py clean bdist_wheel
   cp dist/${PROJECT}-${VERSION}-py2.py3-none-any.whl ${RELEASEDIR}/dist
 
 8. Test the wheels (in a clean sandbox :ref:`local-ref-sandbox`)
