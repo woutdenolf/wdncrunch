@@ -1,5 +1,5 @@
 # ============Initialize environment============
-. $PSScriptRoot\funcs.ps1
+. $PSScriptRoot\..\funcs.ps1
 initEnv
 
 cprint "Checking Pandoc ..."
@@ -58,3 +58,6 @@ if ($NOTDRY) {
         throw "Pandoc was not installed."
     }
 }
+
+$global:BUILDSTEP += 1
+$global:BUILDSTEPS += 1

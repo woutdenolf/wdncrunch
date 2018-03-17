@@ -185,6 +185,23 @@ function _initEnv($reset) {
         $global:NOTDRY = $true
     }
 
+    if ($reset -or $BUILDSTEP -eq $null) {
+        $global:BUILDSTEP = 0
+        $global:BUILDSTEPS = 0
+    }
+
+    if ($reset -or $TIMELEFT -eq $null) {
+        $global:TIMELEFT = $true
+    }
+
+    if ($reset -or $TIMELIMITED -eq $null) {
+        $global:TIMELIMITED = $false
+    }
+
+    if ($reset -or $START_TIME -eq $null) {
+        $global:START_TIME = [Diagnostics.Stopwatch]::StartNew()
+    }
+
 }
 
 # Initialize common variables (only overwrite the derived variables)

@@ -1,10 +1,8 @@
 # ============Initialize environment============
-. $PSScriptRoot\funcs.ps1
+. $PSScriptRoot\..\funcs.ps1
 initEnv
 
 cprint "Checking Pip ..."
-initEnv
-
 if (CorrectPipVersion) {
     cprint_ok "Pip is installed."
     exit
@@ -25,3 +23,5 @@ if ($NOTDRY) {
     }
 }
 
+$global:BUILDSTEP += 1
+$global:BUILDSTEPS += 1

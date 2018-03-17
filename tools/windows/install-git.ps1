@@ -1,5 +1,5 @@
 # ============Initialize environment============
-. $PSScriptRoot\funcs.ps1
+. $PSScriptRoot\..\funcs.ps1
 initEnv
 
 cprint "Checking Git ..."
@@ -60,3 +60,6 @@ if ($NOTDRY) {
         throw "Git was not installed."
     }
 }
+
+$global:BUILDSTEP += 1
+$global:BUILDSTEPS += 1

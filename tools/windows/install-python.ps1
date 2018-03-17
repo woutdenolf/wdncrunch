@@ -1,5 +1,5 @@
 # ============Initialize environment============
-. $PSScriptRoot\funcs.ps1
+. $PSScriptRoot\..\funcs.ps1
 initEnv
 
 
@@ -112,3 +112,6 @@ if ($NOTDRY) {
         throw "$installname is not installed"
     }
 }
+
+$global:BUILDSTEP += 1
+$global:BUILDSTEPS += 1

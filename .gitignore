@@ -5,8 +5,6 @@ build
 dist
 *.egg*
 doc/source/_autosummary
-tools/*.exe
-tools/*.msi
 
 # Temporary files
 *~

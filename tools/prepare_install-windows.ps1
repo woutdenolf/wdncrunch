@@ -51,6 +51,7 @@ if ($h) {
 . $PSScriptRoot\funcs.ps1
 resetEnv
 
+# ============Continue?============
 cprint "System wide installation: $INSTALL_SYSTEMWIDE"
 cprint "Installation target: $INSTALL_TARGET"
 cprint "Root priviliges: $SYSTEM_PRIVILIGES"
@@ -60,11 +61,9 @@ if (!(YesNoQuestion "Continue installation?")) {
 
 # ============Build essentials============
 cprint "Install essentials ..."
-. $PSScriptRoot\install-python.ps1
-. $PSScriptRoot\install-pip.ps1
-. $PSScriptRoot\install-git.ps1
+. $PSScriptRoot\install-essentials.ps1
 
-# ============Show info and ask for continuation============
+# ============Continue?============
 cprint "Python: $PYTHONBIN"
 cprint "Python version: $PYTHONFULLV"
 cprint "Python location: $PYTHON_EXECUTABLE"
@@ -77,18 +76,32 @@ if (!(YesNoQuestion "Continue installation?")) {
 
 # ============Install system dependencies============
 cprint "Install system dependencies ..."
-. $PSScriptRoot\install-pandoc.ps1
+. $PSScriptRoot\install-system.ps1
 
-# ============Install modules============
-cprint "Install python modules available on pypi..."
+# ============Install python packages from PyPi============
+cprint "Install python packages from PyPi..."
 if ($NOTDRY) {
     invoke-expression "$PIPBIN install --upgrade setuptools"
     invoke-expression "$PIPBIN install --upgrade wheel"
     invoke-expression "$PIPBIN install --upgrade -r $PSScriptRoot/../requirements-dev.txt"
 }
 
-# ============Custom installation============
-cprint "Install python modules not available on pypi..."
+# ============Install python packages not available on PyPi============
+cprint "Install python packages not available on PyPi..."
+. $PSScriptRoot\install-custom.ps1
 
 # ============Cleanup============
-#Read-Host "Press any key to exit..."
+cprint "Cleaning up ..."
+if ($NOTDRY) {
+    if ($TIMELEFT) {
+        cprint "All done ($BUILDSTEP/$BUILDSTEPS)! You should now be able to install the project."
+    } else {
+        cprint "Not everything has been build due to time restrictions. Run the script again ($BUILDSTEP/$BUILDSTEPS)."
+    }
+} else {
+    cprint "Dry build $BUILDSTEP/$BUILDSTEPS."
+}
+
+$global:START_TIME.Stop()
+$elapsed = $global:START_TIME.Elapsed.TotalMinutes
+cprint "Total execution time = $elapsed min"

@@ -285,7 +285,7 @@ setup(name=PROJECT,
       extras_require=extras_require,
       setup_requires=setup_requires,
       packages=find_packages(),
-      package_data={'wdncrunch.resources': ['*/*.*']},
+      include_package_data=True,
       license="MIT",
       cmdclass=cmdclass
       )

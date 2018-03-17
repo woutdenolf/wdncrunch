@@ -14,7 +14,10 @@ include _version.py
 
 # Docs
 graft doc
+
+# Exclude temporary directories
 global-exclude .*/*
 global-exclude _*/*
 
 # Packages get included automatically
+global-exclude *.py[cod]

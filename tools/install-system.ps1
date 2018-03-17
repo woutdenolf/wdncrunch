@@ -1,0 +1,1 @@
+. $PSScriptRoot\windows\install-pandoc.ps1

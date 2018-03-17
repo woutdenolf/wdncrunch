@@ -252,7 +252,7 @@ _initEnv()
     fi
 
     # ============Installation progress============
-    if [[ -z $NOTDRY || $RESET == true ]]; then
+    if [[ -z $NOTDRY ]]; then
         NOTDRY=true
     fi
 
