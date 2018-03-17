@@ -173,21 +173,8 @@ if sphinx is not None:
             ## # make sure the python path is pointing to the newly built
             ## # code so that the documentation is built on this and not a
             ## # previously installed version
-
             build = self.get_finalized_command('build')
             sys.path.insert(0, os.path.abspath(build.build_lib))
-
-##             ## # Copy .ui files to the path:
-##             dst = os.path.join(
-##                 os.path.abspath(build.build_lib), "silx", "gui")
-##             if not os.path.isdir(dst):
-##                 os.makedirs(dst)
-##             for i in os.listdir("gui"):
-##                 if i.endswith(".ui"):
-##                     src = os.path.join("gui", i)
-##                     idst = os.path.join(dst, i)
-##                     if not os.path.exists(idst):
-##                         shutil.copy(src, idst)
 
             ## # Build the Users Guide in HTML and TeX format
             for builder in ['html', 'latex']:
@@ -202,6 +189,7 @@ else:
 
 cmdclass['build_doc'] = BuildDocCommand
 
+
 #####################
 ## "clean" command ## 
 #####################
@@ -214,20 +202,21 @@ class CleanCommand(Command):
         pass
     def run(self):
         shutil.rmtree("./build",True)
-        shutil.rmtree("./dict",True)
+        shutil.rmtree("./dist",True)
         
-        patterns = ['*.egg-info','*.tgz']
-        for pattern in patterns:
-            for f in glob.glob(pattern):
-                os.remove(f)
-                
+        # Delete files with pattern (find recursively)
         patterns = ['*.pyc']
         for root, dirnames, filenames in os.walk('.'):
             for pattern in patterns:
                 for filename in fnmatch.filter(filenames, pattern):
-                    os.remove(os.path.join(root, filename))
+                    f = os.path.join(root, filename)
+                    try:
+                        os.remove(f)
+                    except:
+                        print("Could not remove {}".format(f))
 
-        patterns = ['__pycache__']
+        # Delete directories with pattern (find recursively)
+        patterns = ['__pycache__','.ipynb_checkpoints','*egg-info']
         for root, dirnames, filenames in os.walk('.'):
             for pattern in patterns:
                 for dirname in fnmatch.filter(dirnames, pattern):
@@ -261,12 +250,13 @@ classifiers = [get_devstatus(),
                "Intended Audience :: Science/Research",
                "License :: OSI Approved :: MIT License",
                "Natural Language :: English",
-               ## "Operating System :: Microsoft :: Windows",
+               "Operating System :: Microsoft :: Windows",
                "Operating System :: POSIX :: Linux",
                ## "Operating System :: MacOS :: MacOS X",
                "Programming Language :: Python :: 2.7",
-               ## "Programming Language :: Python :: 3.4",
-               ## "Programming Language :: Python :: 3.5",
+               "Programming Language :: Python :: 3.4",
+               "Programming Language :: Python :: 3.5",
+               "Programming Language :: Python :: 3.6",
                "Topic :: Documentation :: Sphinx",
                "Topic :: Scientific/Engineering :: Physics",
                "Topic :: Software Development :: Libraries :: Python Modules"
@@ -295,6 +285,7 @@ setup(name=PROJECT,
       extras_require=extras_require,
       setup_requires=setup_requires,
       packages=find_packages(),
+      package_data={'wdncrunch.resources': ['*/*.*']},
       license="MIT",
       cmdclass=cmdclass
       )
