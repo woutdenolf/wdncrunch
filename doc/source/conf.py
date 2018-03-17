@@ -18,7 +18,6 @@
 #
 import os
 import sys
-# sys.path.insert(0, os.path.abspath('.'))
 
 
 # -- General configuration ------------------------------------------------
@@ -47,7 +46,7 @@ templates_path = ['_templates']
 #
 # source_suffix = ['.rst', '.md']
 source_suffix = '.rst'
-exclude_patterns = ['_build','_templates','_autosummary','**.ipynb_checkpoints']
+exclude_patterns = ['_*/*','.*/*']
 
 # The master toctree document.
 master_doc = 'index'
