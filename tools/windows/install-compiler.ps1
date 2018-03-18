@@ -2,7 +2,7 @@
 . $PSScriptRoot\..\funcs.ps1
 initEnv
 
-function MSVCDownloadLink(version) {
+function MSVCDownloadLink($version) {
     #https://wiki.python.org/moin/WindowsCompilers#Compilers_Installation_and_configuration
 
     $versions = @{}
@@ -16,6 +16,11 @@ function MSVCDownloadLink(version) {
     $tmp["arguments"] += "--passive"
     $tmp["arguments"] += "--add Microsoft.VisualStudio.Workload.MSBuildTools"
     $tmp["arguments"] += "--add Microsoft.VisualStudio.Workload.VCTools"
+    $tmp["arguments"] += "--add Microsoft.VisualStudio.Component.VC.140"
+    --add Microsoft.Net.Component.4.6.1.SDK
+    --add Microsoft.Net.Component.4.6.1.TargetingPack
+
+
     $versions[1900] += $tmp
 
     # ============Python 3.3, 3.4: 10.0 (2010)============
@@ -76,9 +81,16 @@ function MSVCDownloadLink(version) {
     $tmp["arguments"] = @()
     $versions[1500] = $tmp
 
-    if (version in $versions) {
-        return $versions[version]
-    } else {
-        return $null
+    if (!($version.ContainsKey($versions))) {
+        throw "Unknown MSC version $version"
     }
+    
+    return $versions[$version]
+
 }
+
+
+function main(){
+    initMSVC
+}
+

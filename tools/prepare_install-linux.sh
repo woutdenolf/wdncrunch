@@ -152,6 +152,7 @@ fi
 # ============Install python packages============
 cprint "Install python packages available on pypi..."
 if [[ $NOTDRY == true ]]; then
+    $PIPBIN install --upgrade pip
     $PIPBIN install --upgrade setuptools
     $PIPBIN install --upgrade wheel
     $PIPBIN install --upgrade -r $SCRIPT_ROOT/../requirements.txt

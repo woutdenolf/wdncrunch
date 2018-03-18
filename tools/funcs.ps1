@@ -89,7 +89,13 @@ function _initPythonPipEnv($reset) {
         $global:PYTHON_LIBRARY = invoke-expression "$PYTHONBIN -c `"import distutils.sysconfig,os;f=distutils.sysconfig.get_config_var; a=f('LIBDIR');b=f('LDLIBRARY');print(os.path.join(a if a else '',b if b else ''));`""
         #$global:PYTHON_PKG_DIR = invoke-expression "$PYTHONBIN -c `"import distutils.sysconfig; print(distutils.sysconfig.get_python_lib());`""
         
-        $global:PYTHON_COMPILER = invoke-expression "$PYTHONBIN -c `"import sys,re; print(re.search('\[(.*)\]',sys.version).groups()[0])`""
+        $global:PYTHON_COMPILER = invoke-expression "$PYTHONBIN -c `"import platform,re; print(re.search('MSC v.(\d+).+',platform.python_compiler()).groups()[0])`""
+        $global:PYTHON_ARCH = invoke-expression "$PYTHONBIN -c `"import sys;print(sys.maxsize > 2**32)`""
+        if ($global:PYTHON_ARCH -eq "True") {
+            $global:PYTHON_ARCH = 64
+        } else {
+            $global:PYTHON_ARCH = 32
+        }
     } else {
         $global:PYTHONMAJORV = $null
         $global:PYTHONV = $null
@@ -102,6 +108,7 @@ function _initPythonPipEnv($reset) {
         #$global:PYTHON_PKG_DIR = $null
 
         $global:PYTHON_COMPILER = $null
+        $global:PYTHON_ARCH = $null
     }
 
     # Pip info
@@ -128,9 +135,13 @@ function CorrectPythonVersion() {
     $iscorrectminor = ($minor -eq -1) -or ($minori -eq $minor)
     $iscorrectmicro = ($micro -eq -1) -or ($microi -eq $micro)
 
-    $systemtarget = invoke-expression "$PYTHONBIN -c `"import sys,math;int(math.log(sys.maxsize,2)+1)`""
-
-    return $iscorrectmajor -and $iscorrectminor -and $iscorrectmicro -and ($systemtarget -eq $global:SYSTEM_TARGET)
+    $archpython = invoke-expression "$PYTHONBIN -c `"import sys,math;int(math.log(sys.maxsize,2)+1)`""
+    if ($global:TARGET_ARCH -eq $null) {
+        $iscorrectarch = $true
+    } else {
+        $iscorrectarch = $archpython -eq $global:TARGET_ARCH
+    }
+    return $iscorrectmajor -and $iscorrectminor -and $iscorrectmicro -and $iscorrectarch
 }
 
 # Check pip version
@@ -146,24 +157,47 @@ function CorrectPipVersion () {
     return $false
 }
 
+# Target architecture
+function _initArch() {
+    if ($ARCHREQUEST -eq $null) {
+        $global:ARCHREQUEST = -1
+    }
+
+    # From process: [Environment]::Is64BitProcess
+    # From system: [Environment]::Is64BitOperatingSystem
+    if ([Environment]::Is64BitOperatingSystem) {
+        $global:SYSTEM_ARCH = 64
+    } else {
+        $global:SYSTEM_ARCH = 32
+    }
+
+    $archs = @{}
+    $archs["x86"] = 32
+    $archs["i386"] = 32
+    $archs["i686"] = 32
+    $archs[32] = 32
+    $archs["x64"] = 64
+    $archs["x86_64"] = 64
+    $archs["amd64"] = 64
+    $archs[64] = 64
+    if ($archs.ContainsKey($ARCHREQUEST)) {
+        $global:TARGET_ARCH = $archs[$ARCHREQUEST]
+    } else {
+        $global:TARGET_ARCH = $null
+    }
+}
+
+
 # Initialize common variables
 function _initEnv($reset) {
 
     $global:ErrorActionPreference = "Stop"
 
     # ============System properties============
+    _initArch
+
     if ($reset -or ($SYSTEM_PRIVILIGES -eq $null)) {
         $global:SYSTEM_PRIVILIGES = [bool](([System.Security.Principal.WindowsIdentity]::GetCurrent()).groups -match "S-1-5-32-544")
-    }
-
-    if ($reset -or ($SYSTEM_TARGET -eq $null)) {
-        # Determined by process: [Environment]::Is64BitProcess
-        # Determined by system: [Environment]::Is64BitOperatingSystem
-        if ([Environment]::Is64BitOperatingSystem) {
-            $global:SYSTEM_TARGET = 64
-        } else {
-            $global:SYSTEM_TARGET = 32
-        }
     }
 
     # ============Installation properties============
@@ -171,16 +205,8 @@ function _initEnv($reset) {
         $global:INSTALL_SYSTEMWIDE = $SYSTEM_PRIVILIGES
     }
 
-    if ($reset -and ($INSTALL_TARGET -eq $null -or $INSTALL_TARGET -eq 0)) {
-        $global:INSTALL_TARGET = $SYSTEM_TARGET
-    }
-
     if ($INSTALL_SYSTEMWIDE -and !$SYSTEM_PRIVILIGES) {
         $global:INSTALL_SYSTEMWIDE = $SYSTEM_PRIVILIGES
-    }
-
-    if ($INSTALL_TARGET -gt $SYSTEM_TARGET) {
-        $global:INSTALL_TARGET = $SYSTEM_TARGET
     }
 
     # ============Python/Pip============
@@ -233,7 +259,11 @@ function ThrowIfFailed() {
 # ============Installing============
 
 function install_64bit() {
-    return $INSTALL_TARGET -eq 64
+    if ($TARGET_ARCH -eq $null) {
+        return $SYSTEM_ARCH -eq 64
+    } else {
+        return $TARGET_ARCH -eq 64
+    }
 }
 
 function install_msi($filename,$arguments) {
@@ -333,14 +363,54 @@ function parseVersion([string]$versionin) {
     return $major,$minor,$micro
 }
 
+
+# ============Building============
+function Invoke-CmdScript {
+    param(
+        [String] $scriptName
+    )
+    $cmdLine = """$scriptName"" $args & set"
+    & $Env:SystemRoot\system32\cmd.exe /c $cmdLine |
+    select-string '^([^=]*)=(.*)$' | foreach-object {
+      $varName = $_.Matches[0].Groups[1].Value
+      $varValue = $_.Matches[0].Groups[2].Value
+      set-item Env:$varName $varValue
+    }
+}
+
+function initMSVC($version,$arch) {
+    $archs = @{}
+    $archs[32] = "x86"
+    $archs[64] = "x64"
+    if (!($archs.ContainsKey($arch))) {
+        throw "Unknown architecture $arch"
+    }
+
+    $vsarch = $archs[$global:SYSTEM_ARCH]
+    if ($global:SYSTEM_ARCH -ne $arch) {
+        $vsarch = "$vsarch-$archs[$arch]"
+    }
+
+    $versions = @{}
+    $versions[1900] = "$env:programfiles(x86)\\Microsoft Visual Studio\\2017\\BuildTools\\VC\\Auxiliary\\Build\\vcvarsall.bat"
+    $versions[1600] = "$env:programfiles(x86)\\Microsoft Visual Studio 10.0\\VC\\vcvarsall.bat"
+    $versions[1500] = "$env:programfiles(x86)\\Microsoft Visual Studio 9.0\\VC\\vcvarsall.bat"
+    if (!($versions.ContainsKey($version))) {
+        throw "Unknown MSC version $version"
+    }
+
+    Invoke-CmdScript $versions[$version] $vsarch
+}
+
+
 # ============Downloading============
 $webclient = New-Object System.Net.WebClient
 
 function download_file([string]$url, [string]$output) {
 	# Downloads a file if it doesn't already exist
 	if (!(Test-Path $output -pathType leaf)){
-		cprint "Downloading $url to $output ...";
-		$webclient.DownloadFile($url, $output);
+		cprint "Downloading $url to $output ..."
+		$webclient.DownloadFile($url, $output)
 	}
 }
 
@@ -368,4 +438,3 @@ function YesNoQuestion([string]$question) {
 }
 
 
-    
