@@ -14,14 +14,14 @@ Travis CI
 Pre-build dependencies
 ++++++++++++++++++++++
 
-1. Install Ubuntu 12.04.5 LTS: http://releases.ubuntu.com/12.04/
+1. Install Ubuntu release used by Travis (http://releases.ubuntu.com/) and make sure you have a "travis" user:
 
 .. code-block:: bash
 
   adduser travis
   usermod -aG sudo travis
 
-2. Install Python 2.7.13 from source (or any other python version used by Travis):
+2. Install Python release used by Travis:
 
 .. code-block:: bash
 
@@ -29,19 +29,20 @@ Pre-build dependencies
   apt-get update
   apt-get install libbz2-dev libsqlite3-dev libreadline-dev zlib1g-dev libncurses5-dev libssl-dev libgdbm-dev libssl-dev openssl tk-dev
 
-  wget https://www.python.org/ftp/python/2.7.13/Python-2.7.13.tgz
-  tar -xvzf Python-2.7.13.tgz
-  rm Python-2.7.13.tgz
-  cd Python-2.7.13
+  pyversion=2.7.14
+  wget https://www.python.org/ftp/python/${pyversion}/Python-${pyversion}.tgz
+  tar -xvzf Python-${pyversion}.tgz
+  rm Python-${pyversion}.tgz
+  cd Python-${pyversion}
 
-  ./configure --prefix=/opt/python/2.7.13 --enable-shared LDFLAGS=-Wl,-rpath=/opt/python/2.7.13/lib
+  ./configure --prefix=/opt/python/${pyversion} --enable-shared LDFLAGS=-Wl,-rpath=/opt/python/${pyversion}/lib --enable-optimizations
   make -j2
   make install
 
   cd ..
-  rm -rf Python-2.7.13
+  rm -rf Python-${pyversion}
 
-  export PATH="/opt/python/2.7.13/bin/:$PATH"
+  export PATH="/opt/python/${pyversion}/bin/:$PATH"
 
 3. Install pip:
 
@@ -56,8 +57,8 @@ Pre-build dependencies
 .. code-block:: bash
 
   cd /home/travis
-  virtualenv python2.7.13
-  source python2.7.13/bin/activate
+  virtualenv python${pyversion}
+  source python${pyversion}/bin/activate
 
 5. Install dependencies:
 
@@ -66,6 +67,7 @@ Pre-build dependencies
   apt-get install git
   export PROJECT=wdncrunch (or any other project name)
   git clone https://github.com/woutdenolf/${PROJECT}.git
+  sudo -s   # because we need to install system packages
   . ${PROJECT}/tools/prepare_install-linux.sh -u
 
 Accept when:
