@@ -19,58 +19,69 @@ environment:
         BUILD_FOLDER: "%HOMEDRIVE%%HOMEPATH%\\build"
 
     matrix:
-        - PYTHON: "C:\\Python27-x64"
+        - PYTHON_DIR: "C:\\Python27"
+        - PYTHON_DIR: "C:\\Python27-x64"
+        - PYTHON_DIR: "C:\\Python34"
+        - PYTHON_DIR: "C:\\Python34-x64"
+        - PYTHON_DIR: "C:\\Python35"
+        - PYTHON_DIR: "C:\\Python35-x64"
+        - PYTHON_DIR: "C:\\Python36"
+        - PYTHON_DIR: "C:\\Python36-x64"
 
-        - PYTHON: "C:\\Python34-x64"
-
-        - PYTHON: "C:\\Python35-x64"
-
-        - PYTHON: "C:\\Python36-x64"
-
-# Before clone
 init:
-    - ps: |
-      Write-Host "Build worker environment variables:" -ForegroundColor Magenta
-      Get-ChildItem Env: | %{"{0}={1}" -f $_.Name,$_.Value}
 
-    - cmd: SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
-    - cmd: mkdir -p %CACHED_FOLDER%
-    - cmd: mkdir -p %BUILD_FOLDER%
+    # Before clone
+    - ps: |
+          [Environment]::SetEnvironmentVariable("path", "$env:PYTHON_DIR;$env:PYTHON_DIR\\Scripts;$env:path", "process")
+    - ps: mkdir -force $env:CACHED_FOLDER
+    - ps: mkdir -force $env:BUILD_FOLDER
+    - ps: |
+          Write-Host "Build worker environment variables:" -ForegroundColor Magenta
+          Get-ChildItem Env: | %{"{0}={1}" -f $_.Name,$_.Value}
 
 install:
 
     # Install Appveyor specific dependencies
-    - cmd: cd %BUILD_FOLDER%
-    - ps: .\$APPVEYOR_BUILD_FOLDER\ci\prepare_appveyor-windows.ps1
+    - ps: cd $env:BUILD_FOLDER
+    - ps: invoke-expression "$env:APPVEYOR_BUILD_FOLDER\ci\prepare_appveyor-windows.ps1"
 
     # Install build dependencies
-    - cmd: cd %BUILD_FOLDER%
-    - ps: $APPVEYOR_BUILD_FOLDER/tools/prepare_install-windows.ps1 -y -u
+    - ps: cd $env:BUILD_FOLDER
+    - ps: invoke-expression "$env:APPVEYOR_BUILD_FOLDER\tools\prepare_install-windows.ps1 -y -u"
+    - ps: invoke-expression "$PIPBIN install --upgrade -r $env:APPVEYOR_BUILD_FOLDER/requirements-dev.txt"
 
 build_script:
+    # Error handling
+    - ps: $global:ErrorActionPreference = "Continue"
+    #- ps: $global:ErrorActionPreference = "Stop"
 
     # Package directory  
-    - cmd: cd %APPVEYOR_BUILD_FOLDER%
+    - ps: cd $env:APPVEYOR_BUILD_FOLDER
 
     # Print Python info
-    - cmd: %PYTHONBIN% ci\\info_platform.py
-    - cmd: %PIPBIN% list
+    - ps: invoke-expression "$PYTHONBIN ci\\info_platform.py"
+    - ps: write-host $PIPBIN
+    - ps: invoke-expression "$PIPBIN list --format=columns"
 
     # Build package
-    - cmd: %PYTHONBIN% setup.py build
-    - cmd: %PYTHONBIN% setup.py bdist_wheel bdist_msi
+    - ps: invoke-expression "$PYTHONBIN setup.py build"
+    #- ps: invoke-expression "$PYTHONBIN setup.py build_doc"
+    - cmd: python setup.py build_doc
+    - ps: ls build
+    - ps: invoke-expression "$PYTHONBIN setup.py sdist bdist_wheel bdist_msi"
     - ps: ls dist
 
     # Install package
-    - cmd: %PIPBIN% install --pre --no-index --find-links=dist/ %APPVEYOR_PROJECT_NAME%
+    - ps: cd $env:HOMEDRIVE$env:HOMEPATH
+    - ps: invoke-expression "$PIPBIN install --pre --no-index --find-links=$env:APPVEYOR_BUILD_FOLDER/dist/ $env:APPVEYOR_PROJECT_NAME"
 
 test_script:
 
-    # Test installation
-    - cmd: cd %HOMEDRIVE%%HOMEPATH%
-    - cmd: %PYTHONBIN% -m %APPVEYOR_PROJECT_NAME%.tests.test_all
-    - cmd: cd %APPVEYOR_BUILD_FOLDER%
+    # Test installation (ps version always throws an error)
+    #- ps: invoke-expression "$PYTHONBIN -m $env:APPVEYOR_PROJECT_NAME.tests.test_all"
+    - cmd: python -m %APPVEYOR_PROJECT_NAME%.tests.test_all
+    - ps: cd $env:APPVEYOR_BUILD_FOLDER
 
 artifacts:
-    # Archive the generated wheel package in the ci.appveyor.com build report.
-    - path: dist\*
+    # Archive the generated wheels and msi
+    #- path: dist\*

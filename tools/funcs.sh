@@ -100,7 +100,7 @@ initPython()
     export PYTHONBIN=$PYTHONBINAPT
 
     if [[ -z `which $PYTHONBIN` && $SYSTEM_PRIVILIGES == true && $NOTDRY == true ]]; then
-        mexec "apt-get -y install $PYTHONBINAPT $PYTHONBINAPT-dev $PYTHONBINAPT-qt4"
+        mexec "apt-get -y install $PYTHONBINAPT $PYTHONBINAPT-dev"
     fi
 
     if [[ -z `which $PYTHONBIN` ]]; then
@@ -252,7 +252,7 @@ _initEnv()
     fi
 
     # ============Installation progress============
-    if [[ -z $NOTDRY || $RESET == true ]]; then
+    if [[ -z $NOTDRY ]]; then
         NOTDRY=true
     fi
 

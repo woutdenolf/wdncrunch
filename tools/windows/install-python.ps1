@@ -1,7 +1,6 @@
 # ============Initialize environment============
-. $PSScriptRoot\funcs.ps1
+. $PSScriptRoot\..\funcs.ps1
 initEnv
-
 
 # Get a hashtree with download links for each version
 function pythonVersions() {
@@ -52,63 +51,71 @@ function FindPythonVersion([int]$num,[hashtable]$versions) {
 }
 
 
-cprint "Checking Python ..."
-initEnv
-
-# Return when already ok
-if (CorrectPythonVersion) {
-    cprint_ok "Python is installed."
-    exit
-}
-
-# Download requested version
-if ($PYTHONVREQUEST -eq -1) {
-    $global:PYTHONVREQUEST = 3
-}
-$major,$minor,$micro = parseVersion $PYTHONVREQUEST
-
-$link = ""
-$link,$major = FindPythonVersion $major (pythonVersions)
-$link,$minor = FindPythonVersion $minor $link
-$link,$micro = FindPythonVersion $micro $link
-$filename = $link.split('/')[-1]
-
-if ($NOTDRY) {
-    download_file $link $filename
-}
-
-# Install
-if (install_64bit){
-    $installname = "Python $major.$minor.$micro (64-bit)"
-} else {
-    $installname = "Python $major.$minor.$micro (32-bit)"
-}
-$path = defaultTargetDir
-cprint "Installing $installname in $path ..."
-if ($NOTDRY) {
-    $arguments = @{}
-    $arguments["msi"] = @()
-    $arguments["exe"] = @()
-
-    $arguments["msi"] += "/passive"
-    $arguments["exe"] += "/passive"
-
-    $tmp = [int]$INSTALL_SYSTEMWIDE
-    $arguments["msi"] += "ALLUSERS=`"$tmp`""
-    $arguments["exe"] += "InstallAllUsers=$tmp"
-
-    $arguments["exe"] += "Include_test=0"
-    $arguments["exe"] += "PrependPath=1"
-    $arguments["exe"] += "Include_launcher=1"
-    $arguments["exe"] += "InstallLauncherAllUsers=$tmp"
-
-    install_any $filename $arguments
-    updateBinPath
-
+function main() {
+    cprint "Checking Python ..."
     initEnv
+
+    # Return when already ok
     if (CorrectPythonVersion) {
         cprint_ok "Python is installed."
-    } else {
-        throw "$installname is not installed"
+        return
     }
+
+    # Download requested version
+    if ($PYTHONVREQUEST -eq -1) {
+        $global:PYTHONVREQUEST = 3
+    }
+    $major,$minor,$micro = parseVersion $PYTHONVREQUEST
+
+    $link = ""
+    $link,$major = FindPythonVersion $major (pythonVersions)
+    $link,$minor = FindPythonVersion $minor $link
+    $link,$micro = FindPythonVersion $micro $link
+    $filename = $link.split('/')[-1]
+    $filename = "$PSScriptRoot\$filename"
+
+    if ($NOTDRY) {
+        download_file $link $filename
+    }
+
+    # Install
+    if (install_64bit){
+        $installname = "Python $major.$minor.$micro (64-bit)"
+    } else {
+        $installname = "Python $major.$minor.$micro (32-bit)"
+    }
+    $path = defaultTargetDir
+    cprint "Installing $installname in $path ..."
+    if ($NOTDRY) {
+        $arguments = @{}
+        $arguments["msi"] = @()
+        $arguments["exe"] = @()
+
+        $arguments["msi"] += "/passive"
+        $arguments["exe"] += "/passive"
+
+        $tmp = [int]$INSTALL_SYSTEMWIDE
+        $arguments["msi"] += "ALLUSERS=`"$tmp`""
+        $arguments["exe"] += "InstallAllUsers=$tmp"
+
+        $arguments["exe"] += "Include_test=0"
+        $arguments["exe"] += "PrependPath=1"
+        $arguments["exe"] += "Include_launcher=1"
+        $arguments["exe"] += "InstallLauncherAllUsers=$tmp"
+
+        install_any $filename $arguments
+        updateBinPath
+
+        initEnv
+        if (CorrectPythonVersion) {
+            cprint_ok "Python is installed."
+        } else {
+            throw "$installname is not installed"
+        }
+    }
+
+    $global:BUILDSTEP += 1
+    $global:BUILDSTEPS += 1
 }
+
+main

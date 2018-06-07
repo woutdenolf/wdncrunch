@@ -1,21 +1,23 @@
-# Files to be distributed (does not control what is installed)
+# Files for source distribution
 #
 # Check: check-manifest -u -v
 
+# Top-level
 include README.rst
 include CHANGELOG.rst
 include LICENSE
 include setup.py
 include setup.cfg
 include requirements.txt
+include requirements-dev.txt
 include _version.py
 
-recursive-include doc *.py
-recursive-include doc *.rst
-recursive-include doc make.bat
-recursive-include doc Makefile
+# Docs
+graft doc
 
-recursive-include tools *.rst
-recursive-include tools *.sh
+# Exclude temporary directories
+global-exclude .*/*
+global-exclude _*/*
 
-
+# Packages get included automatically
+global-exclude *.py[cod]

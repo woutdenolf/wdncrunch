@@ -38,3 +38,4 @@ if __name__ == '__main__':
     runner = unittest.TextTestRunner()
     if not runner.run(mysuite).wasSuccessful():
         sys.exit(1)
+

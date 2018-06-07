@@ -5,7 +5,9 @@ Change Log
 -----------------------
 
 * Create first project template
-
+* Travis CI (Linux, Python 2+3, Docs)
+* Appveyor CI (Windows, Python 2+3, Docs)
+* ReadTheDocs (Phinx Docs + notebooks)
 
 `genesis`_ (unreleased)
 -----------------------

@@ -4,7 +4,7 @@ Guide for developers
 .. contents::
 
 
-.. _localrefconfiggit:
+.. _local-ref-configgit:
 
 Configure git
 -------------
@@ -16,10 +16,10 @@ Configure git
     git config --global core.autocrlf true
     git config --global user.signingkey YOURMASTERKEYID
 
-The signing key is only needed by project managers to sign tags and PyPi releases (see `signing  <localrefsigning_>`_). Other contributors only need to concern themselves with pull-requests on Github (see `contribute  <localrefcontribute_>`_).
+The signing key is only needed by project managers to sign tags and PyPi releases (:ref:`local-ref-signing`). Other contributors only need to concern themselves with pull-requests on Github (:ref:`local-ref-contribute`).
 
 
-.. _localrefcontribute:
+.. _local-ref-contribute:
 
 Contribute
 ----------
@@ -79,7 +79,7 @@ Assuming you forked the project on Github, then your fork will be referred to as
   git fetch -p upstream
 
 
-.. _localrefincversion:
+.. _local-ref-incversion:
 
 Bump version
 ------------
@@ -91,13 +91,13 @@ Bump version
   git checkout master
   git pull upstream master
 
-2. Update version in _version.py and update CHANGELOG.rst (see `versioning  <localrefversion_>`_)
+2. Update version in _version.py and update CHANGELOG.rst (:ref:`local-ref-version`)
 
 .. code-block:: bash
   
   echo `python -c "from _version import version;print(\"v{}\".format(version));"`
 
-3. Check whether the branch can be `released  <localrefreleasable_>`_.
+3. Check whether the branch can be build (:ref:`local-ref-build`)
 
 4. Commit and tag new version
 
@@ -120,7 +120,7 @@ Bump version
    compare: v1.2.3
 
 
-.. _localrefversion:
+.. _local-ref-version:
 
 Version number
 ++++++++++++++
@@ -146,7 +146,7 @@ Version number
   final : stable version
 
 
-.. _localrefreleaseversion:
+.. _local-ref-releaseversion:
 
 Release and deploy
 ------------------
@@ -159,7 +159,7 @@ Release and deploy
   git pull upstream master
   git checkout v1.2.3
 
-2. Check whether the branch can be `released  <localrefreleasable_>`_. `Increase the version number <localrefincversion_>`_ when something needed fixing.
+2. Build the branch (:ref:`local-ref-build`). Increase the version number when something needed fixing (:ref:`local-ref-incversion`).
 
 3. Create a release on Github based on the tag
 
@@ -167,7 +167,7 @@ Release and deploy
 
   Body: Copy from CHANGELOG
 
-4. Deploy code (see `pypi setup  <localrefdeployment_>`_)
+4. Deploy code (see :ref:`local-ref-deployment` for pypi setup)
 
 .. code-block:: bash
 
@@ -182,7 +182,7 @@ Release and deploy
   http://pypi.python.org/pypi?%3Aaction=pkg_edit&name=${PROJECT}
 
 
-.. _localrefreleasable:
+.. _local-ref-build:
 
 Build
 +++++
@@ -193,9 +193,7 @@ Build
   
   pip install --upgrade -r requirements-dev.txt
 
-2. Create a clean `sandbox <localrefsandbox_>`_ and make a fresh git clone.
-
-3. Create release directory
+2. Create release directory
 
 .. code-block:: bash
 
@@ -204,46 +202,48 @@ Build
   rm -r ${RELEASEDIR}
   mkdir -p ${RELEASEDIR}/dist
 
-4. Build the source tarball
+3. Build the source tarball from a fresh git clone (in a clean sandbox :ref:`local-ref-sandbox`)
 
 .. code-block:: bash
   
+  git clone https://github.com/woutdenolf/${PROJECT}
+  cd ${PROJECT}
   python setup.py clean sdist
   cp dist/${PROJECT}-${VERSION}.tar.gz ${RELEASEDIR}/dist
 
-5. Test the source
+4. Test the source (in a clean sandbox :ref:`local-ref-sandbox`)
 
 .. code-block:: bash
   
-  tar zxvf ${RELEASEDIR}/dist/${PROJECT}-${VERSION}.tar.gz
-  cd ${PROJECT}-${VERSION}
-  pip install .
+  pip install ${RELEASEDIR}/dist/${PROJECT}-${VERSION}.tar.gz
   python -m ${PROJECT}.tests.test_all
-  
-6. Release the docs
+
+5. Release the docs (in a clean sandbox :ref:`local-ref-sandbox`)
 
 .. code-block:: bash
-  
+
+  tar -zxvf ${RELEASEDIR}/dist/${PROJECT}-${VERSION}.tar.gz
+  cd ${PROJECT}-${VERSION}
   python setup.py clean build_doc
-  pip uninstall -y ${PROJECT}
   cd build/sphinx/html
   zip -r ${RELEASEDIR}/html_doc.zip .
-  cd ../../..
 
-7. Inspect the docs
+6. Inspect the docs
 
 .. code-block:: bash
   
   firefox build/sphinx/html/index.html
 
-8. Build the wheels (do this on different platforms)
+7. Build the wheels on different platforms (in a clean sandbox :ref:`local-ref-sandbox`)
 
 .. code-block:: bash
   
-  python setup.py clean bdist_wheel --universal
+  tar -zxvf ${RELEASEDIR}/dist/${PROJECT}-${VERSION}.tar.gz
+  cd ${PROJECT}-${VERSION}
+  python setup.py clean bdist_wheel
   cp dist/${PROJECT}-${VERSION}-py2.py3-none-any.whl ${RELEASEDIR}/dist
 
-9. Test the wheels
+8. Test the wheels (in a clean sandbox :ref:`local-ref-sandbox`)
 
 .. code-block:: bash
   
@@ -251,13 +251,13 @@ Build
   python -m ${PROJECT}.tests.test_all
   pip uninstall -y ${PROJECT}
 
-10. Delete the `sandbox  <localrefsandbox_>`_
+9. Delete the sandboxes (:ref:`local-ref-sandbox`)
 
 
-.. _localrefdeployment:
+.. _local-ref-deployment:
 
-Deployment
-++++++++++
+Deploy
+++++++
 
 Add PyPi credentials file ~/.pypirc (chmod 600):
 
@@ -286,7 +286,7 @@ Register project (already done):
   twine register -r pypitest dist/*.whl
 
 
-.. _localrefsandbox:
+.. _local-ref-sandbox:
 
 Sandbox
 +++++++
@@ -295,13 +295,54 @@ Sandbox
 
 .. code-block:: bash
 
-  virtualenv test1.2.3
+  virtualenv --system-site-packages test1.2.3
   cd test1.2.3
   source bin/activate
 
+or on windows
+
+.. code-block:: powershell
+
+  virtualenv --system-site-packages test1.2.3
+  cd test1.2.3
+  .\bin\activate
+
+To create a sandbox which is destroyed on shell exit (add to "~./bashrc")
+
+.. code-block:: bash
+
+  function pybox {
+    local PYBOXDIR=$(mktemp -d --tmpdir pybox.XXXXXXXX)
+    virtualenv $PYBOXDIR
+    source $PYBOXDIR/bin/activate
+    export PYBOXRM="${PYBOXRM}rm -r $PYBOXDIR;"
+    trap "$PYBOXRM" EXIT
+  }
+
+or on windows (add to "C:\\Users\\\$env:username\\\Documents\\\WindowsPowerShell\\\Microsoft.PowerShell_profile.ps1")
+
+.. code-block:: powershell
+
+  function New-TemporaryDirectory {
+    $parent = [System.IO.Path]::GetTempPath()
+    [string] $name = -join ((65..90) + (97..122) + (48..57) | Get-Random -Count 8 | % {[char]$_})
+    $tmppath = Join-Path $parent "pybox.$name"
+    write-host $tmppath
+    New-Item -ItemType Directory -Path $tmppath | Out-Null
+    return $tmppath
+  }
+
+  function pybox {
+    $PYBOXDIR = New-TemporaryDirectory
+    virtualenv $PYBOXDIR
+    invoke-expression "$PYBOXDIR\Scripts\activate.ps1"
+    invoke-expression "Register-EngineEvent PowerShell.Exiting {Remove-Item -Recurse -Force $PYBOXDIR} -SupportEvent"
+  }
+
+
 * Using `pyenv <https://github.com/pyenv/pyenv/>`_
 
-Installation and activation
+Installation and activation (on Linux)
 
 .. code-block:: bash
 
@@ -372,7 +413,7 @@ Other dependencies (including essentials) in powershell:
 
 .. code-block:: powershell
 
- .\prepare_install-linux.ps1 -h
+ .\prepare_install-windows.ps1 -h
 
 or cmd
 
@@ -380,8 +421,7 @@ or cmd
 
  prepare_install-linux.bat -h
 
-To create your own installers, use `lessmsi <https://github.com/activescott/lessmsi>` to investigate msi command line arguments (Table view > Property).
-
+To create your own install scripts, use `lessmsi <https://github.com/activescott/lessmsi>`_ to investigate msi command line arguments (Table view > Property).
 
 
 Help
@@ -394,7 +434,7 @@ Help
     python setup.py bdist --help-formats
 
 
-.. _localrefsigning:
+.. _local-ref-signing:
 
 Signing
 -------
@@ -447,7 +487,7 @@ Show all keys:
     gpg --list-keys
 
 
-.. _localrefstart:
+.. _local-ref-start:
 
 Start a project
 ---------------
@@ -478,7 +518,7 @@ Start a project
     sphinx-quickstart
     sphinx-apidoc -o doc/source/modules ${PROJECT}
 
-4. `Check whether the project can be released <localrefreleasable_>`_
+4. Check whether the project can be build (:ref:`local-ref-build`)
 
 5. Create genesis version
 

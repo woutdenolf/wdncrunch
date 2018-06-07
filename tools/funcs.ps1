@@ -38,47 +38,14 @@ function cmd_exists($cmdName) {
 }
 
 
-# Initialize common variables
-function _initEnv($reset) {
+# Initialize python variables
+function _initPythonPipEnv($reset) {
 
-    $global:ErrorActionPreference = "Stop"
-
-    # ============System properties============
-    if ($reset -or ($SYSTEM_PRIVILIGES -eq $null)) {
-        $global:SYSTEM_PRIVILIGES = [bool](([System.Security.Principal.WindowsIdentity]::GetCurrent()).groups -match "S-1-5-32-544")
-    }
-
-    if ($reset -or ($SYSTEM_TARGET -eq $null)) {
-        # Determined by process: [Environment]::Is64BitProcess
-        # Determined by system: [Environment]::Is64BitOperatingSystem
-        if ([Environment]::Is64BitOperatingSystem) {
-            $global:SYSTEM_TARGET = 64
-        } else {
-            $global:SYSTEM_TARGET = 32
-        }
-    }
-
-    # ============Installation properties============
-    if ($reset -and ($INSTALL_SYSTEMWIDE -eq $null)) {
-        $global:INSTALL_SYSTEMWIDE = $SYSTEM_PRIVILIGES
-    }
-
-    if ($reset -and ($INSTALL_TARGET -eq $null -or $INSTALL_TARGET -eq 0)) {
-        $global:INSTALL_TARGET = $SYSTEM_TARGET
-    }
-
-    if ($INSTALL_SYSTEMWIDE -and !$SYSTEM_PRIVILIGES) {
-        $global:INSTALL_SYSTEMWIDE = $SYSTEM_PRIVILIGES
-    }
-
-    if ($INSTALL_TARGET -gt $SYSTEM_TARGET) {
-        $global:INSTALL_TARGET = $SYSTEM_TARGET
-    }
-
-    # ============Python/Pip============
     if ($PYTHONVREQUEST -eq $null) {
         $global:PYTHONVREQUEST = -1
     }
+
+    # Find requested version of python
     if ($reset -or !(CorrectPythonVersion)) {
         $global:PYTHONBIN = $null
 
@@ -100,14 +67,17 @@ function _initEnv($reset) {
                 $global:PYTHONBIN = $null
             }
         }
-        
     }
+
+    # Find requested pip
     if ($reset -or !(CorrectPipVersion)) {
         $global:PIPBIN = $null
         if (CorrectPythonVersion) {
             $global:PIPBIN = "$PYTHONBIN -m pip"
         }
     }
+
+    # Python info
     if (cmd_exists $PYTHONBIN) {
         $global:PYTHONMAJORV = invoke-expression "$PYTHONBIN -c `"import sys;print(sys.version_info[0])`""
         $global:PYTHONV = invoke-expression "$PYTHONBIN -c `"import sys;t='{v[0]}.{v[1]}'.format(v=list(sys.version_info[:2]));print(t)`""
@@ -118,6 +88,14 @@ function _initEnv($reset) {
         $global:PYTHON_INCLUDE_DIR = invoke-expression "$PYTHONBIN -c `"import distutils.sysconfig; print(distutils.sysconfig.get_python_inc());`""
         $global:PYTHON_LIBRARY = invoke-expression "$PYTHONBIN -c `"import distutils.sysconfig,os;f=distutils.sysconfig.get_config_var; a=f('LIBDIR');b=f('LDLIBRARY');print(os.path.join(a if a else '',b if b else ''));`""
         #$global:PYTHON_PKG_DIR = invoke-expression "$PYTHONBIN -c `"import distutils.sysconfig; print(distutils.sysconfig.get_python_lib());`""
+        
+        $global:PYTHON_COMPILER = invoke-expression "$PYTHONBIN -c `"import platform,re; print(re.search('MSC v.(\d+).+',platform.python_compiler()).groups()[0])`""
+        $global:PYTHON_ARCH = invoke-expression "$PYTHONBIN -c `"import sys;print(sys.maxsize > 2**32)`""
+        if ($global:PYTHON_ARCH -eq "True") {
+            $global:PYTHON_ARCH = 64
+        } else {
+            $global:PYTHON_ARCH = 32
+        }
     } else {
         $global:PYTHONMAJORV = $null
         $global:PYTHONV = $null
@@ -128,17 +106,132 @@ function _initEnv($reset) {
         $global:PYTHON_INCLUDE_DIR = $null
         $global:PYTHON_LIBRARY = $null
         #$global:PYTHON_PKG_DIR = $null
+
+        $global:PYTHON_COMPILER = $null
+        $global:PYTHON_ARCH = $null
     }
 
+    # Pip info
     if (cmd_exists $PIPBIN) {
         $global:PIPFULLV = (invoke-expression "$PIPBIN --version")
     } else {
         $global:PIPFULLV = $false
     }
+}
+
+# Check Python version
+function CorrectPythonVersion() {
+    if ($PYTHONVREQUEST -eq $null) {
+        $global:PYTHONVREQUEST = -1
+    }
+    if (!(cmd_exists $PYTHONBIN)) {
+        return $false
+    }
+
+    $versioni = invoke-expression "$PYTHONBIN -c `"import sys;t='{v[0]}.{v[1]}.{v[2]}'.format(v=list(sys.version_info[:3]));print(t)`""
+    $majori,$minori,$microi = parseVersion $versioni
+    $major,$minor,$micro = parseVersion $PYTHONVREQUEST
+    $iscorrectmajor = ($major -eq -1) -or ($majori -eq $major)
+    $iscorrectminor = ($minor -eq -1) -or ($minori -eq $minor)
+    $iscorrectmicro = ($micro -eq -1) -or ($microi -eq $micro)
+
+    $archpython = invoke-expression "$PYTHONBIN -c `"import sys,math;int(math.log(sys.maxsize,2)+1)`""
+    if ($global:TARGET_ARCH -eq $null) {
+        $iscorrectarch = $true
+    } else {
+        $iscorrectarch = $archpython -eq $global:TARGET_ARCH
+    }
+    return $iscorrectmajor -and $iscorrectminor -and $iscorrectmicro -and $iscorrectarch
+}
+
+# Check pip version
+function CorrectPipVersion () {
+    if (!(cmd_exists $PIPBIN)) {
+        return $false
+    }
+
+    # Perl installations also have a pip
+    foreach ($tmp in (invoke-expression "$PIPBIN -h")) {
+        if ($tmp.contains("python")) {return $true}
+    }
+    return $false
+}
+
+# Target architecture
+function _initArch() {
+    if ($ARCHREQUEST -eq $null) {
+        $global:ARCHREQUEST = -1
+    }
+
+    # From process: [Environment]::Is64BitProcess
+    # From system: [Environment]::Is64BitOperatingSystem
+    if ([Environment]::Is64BitOperatingSystem) {
+        $global:SYSTEM_ARCH = 64
+    } else {
+        $global:SYSTEM_ARCH = 32
+    }
+
+    $archs = @{}
+    $archs["x86"] = 32
+    $archs["i386"] = 32
+    $archs["i686"] = 32
+    $archs[32] = 32
+    $archs["x64"] = 64
+    $archs["x86_64"] = 64
+    $archs["amd64"] = 64
+    $archs[64] = 64
+    if ($archs.ContainsKey($ARCHREQUEST)) {
+        $global:TARGET_ARCH = $archs[$ARCHREQUEST]
+    } else {
+        $global:TARGET_ARCH = $null
+    }
+}
+
+
+# Initialize common variables
+function _initEnv($reset) {
+
+    $global:ErrorActionPreference = "Stop"
+
+    # ============System properties============
+    _initArch
+
+    if ($reset -or ($SYSTEM_PRIVILIGES -eq $null)) {
+        $global:SYSTEM_PRIVILIGES = [bool](([System.Security.Principal.WindowsIdentity]::GetCurrent()).groups -match "S-1-5-32-544")
+    }
+
+    # ============Installation properties============
+    if ($reset -and ($INSTALL_SYSTEMWIDE -eq $null)) {
+        $global:INSTALL_SYSTEMWIDE = $SYSTEM_PRIVILIGES
+    }
+
+    if ($INSTALL_SYSTEMWIDE -and !$SYSTEM_PRIVILIGES) {
+        $global:INSTALL_SYSTEMWIDE = $SYSTEM_PRIVILIGES
+    }
+
+    # ============Python/Pip============
+    _initPythonPipEnv($reset)
 
     # ============Installation progress============
     if ($NOTDRY -eq $null) {
         $global:NOTDRY = $true
+    }
+
+    if ($reset -or $BUILDSTEP -eq $null) {
+        $global:BUILDSTEP = 0
+        $global:BUILDSTEPS = 0
+    }
+
+    if ($reset -or $TIMELEFT -eq $null) {
+        $global:TIMELEFT = $true
+    }
+
+    if ($reset -or $TIMELIMITED -eq $null) {
+        $global:TIMELIMITED = $false
+    }
+
+    if ($reset -or $START_TIME -eq $null) {
+        $global:START_TIME = [Diagnostics.Stopwatch]::StartNew()
     }
 
 }
@@ -166,7 +259,11 @@ function ThrowIfFailed() {
 # ============Installing============
 
 function install_64bit() {
-    return $INSTALL_TARGET -eq 64
+    if ($TARGET_ARCH -eq $null) {
+        return $SYSTEM_ARCH -eq 64
+    } else {
+        return $TARGET_ARCH -eq 64
+    }
 }
 
 function install_msi($filename,$arguments) {
@@ -266,36 +363,43 @@ function parseVersion([string]$versionin) {
     return $major,$minor,$micro
 }
 
-# Check Python version
-function CorrectPythonVersion() {
-    if ($PYTHONVREQUEST -eq $null) {
-        $global:PYTHONVREQUEST = -1
-    }
-    if (!(cmd_exists $PYTHONBIN)) {
-        return $false
-    }
 
-    $versioni = invoke-expression "$PYTHONBIN -c `"import sys;t='{v[0]}.{v[1]}.{v[2]}'.format(v=list(sys.version_info[:3]));print(t)`""
-    $majori,$minori,$microi = parseVersion $versioni
-    $major,$minor,$micro = parseVersion $PYTHONVREQUEST
-    $iscorrectmajor = ($major -eq -1) -or ($majori -eq $major)
-    $iscorrectminor = ($minor -eq -1) -or ($minori -eq $minor)
-    $iscorrectmicro = ($micro -eq -1) -or ($microi -eq $micro)
-
-    return $iscorrectmajor -and $iscorrectminor -and $iscorrectmicro
+# ============Building============
+function Invoke-CmdScript {
+    param(
+        [String] $scriptName
+    )
+    $cmdLine = """$scriptName"" $args & set"
+    & $Env:SystemRoot\system32\cmd.exe /c $cmdLine |
+    select-string '^([^=]*)=(.*)$' | foreach-object {
+      $varName = $_.Matches[0].Groups[1].Value
+      $varValue = $_.Matches[0].Groups[2].Value
+      set-item Env:$varName $varValue
+    }
 }
 
-# Check pip version
-function CorrectPipVersion () {
-    if (!(cmd_exists $PIPBIN)) {
-        return $false
+function initMSVC($version,$arch) {
+    $archs = @{}
+    $archs[32] = "x86"
+    $archs[64] = "x64"
+    if (!($archs.ContainsKey($arch))) {
+        throw "Unknown architecture $arch"
     }
 
-    # Perl installations also have a pip
-    foreach ($tmp in (invoke-expression "$PIPBIN -h")) {
-        if ($tmp.contains("python")) {return $true}
+    $vsarch = $archs[$global:SYSTEM_ARCH]
+    if ($global:SYSTEM_ARCH -ne $arch) {
+        $vsarch = "$vsarch-$archs[$arch]"
     }
-    return $false
+
+    $versions = @{}
+    $versions[1900] = "$env:programfiles(x86)\\Microsoft Visual Studio\\2017\\BuildTools\\VC\\Auxiliary\\Build\\vcvarsall.bat"
+    $versions[1600] = "$env:programfiles(x86)\\Microsoft Visual Studio 10.0\\VC\\vcvarsall.bat"
+    $versions[1500] = "$env:programfiles(x86)\\Microsoft Visual Studio 9.0\\VC\\vcvarsall.bat"
+    if (!($versions.ContainsKey($version))) {
+        throw "Unknown MSC version $version"
+    }
+
+    Invoke-CmdScript $versions[$version] $vsarch
 }
 
 
@@ -305,8 +409,8 @@ $webclient = New-Object System.Net.WebClient
 function download_file([string]$url, [string]$output) {
 	# Downloads a file if it doesn't already exist
 	if (!(Test-Path $output -pathType leaf)){
-		cprint "Downloading $url to $output ...";
-		$webclient.DownloadFile($url, $output);
+		cprint "Downloading $url to $output ..."
+		$webclient.DownloadFile($url, $output)
 	}
 }
 
@@ -334,4 +438,3 @@ function YesNoQuestion([string]$question) {
 }
 
 
-    

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-#   Copyright (C) 2015 European Synchrotron Radiation Facility, Grenoble, France
+#   Copyright (C) 2017 European Synchrotron Radiation Facility, Grenoble, France
 #
 #   Principal author:   Wout De Nolf (wout.de_nolf@esrf.eu)
 #
@@ -21,30 +21,18 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+"""Resource files
+"""
 
-import unittest
+import os 
 
-from ..classb import classb
+def resource_filename(resource):
+    """
+    Args:
+        resource(str): resource path relative to resource directory
 
-import numpy as np
-
-class test_classb(unittest.TestCase):
-
-    def test(self):
-        o = classb()
-        self.assertEqual(o.func(1),1)
-
-def test_suite_all():
-    """Test suite including all test suites"""
-    testSuite = unittest.TestSuite()
-    testSuite.addTest(test_classb("test"))
-    return testSuite
-    
-if __name__ == '__main__':
-    import sys
-
-    mysuite = test_suite_all()
-    runner = unittest.TextTestRunner()
-    if not runner.run(mysuite).wasSuccessful():
-        sys.exit(1)
-
+    Returns:
+        str: absolute resource path in the file system
+    """
+    return os.path.join(os.path.abspath(os.path.dirname(__file__)),
+                            *resource.split('/'))
