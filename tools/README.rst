@@ -14,7 +14,7 @@ Configure git
     git config --global user.name githubname
     git config --global user.email user@domain
     git config --global core.autocrlf true
-    git config --global user.signingkey YOURMASTERKEYID
+    git config --global user.signingkey YOURSUBKEYID!
 
 The signing key is only needed by project managers to sign tags and PyPi releases (:ref:`local-ref-signing`). Other contributors only need to concern themselves with pull-requests on Github (:ref:`local-ref-contribute`).
 
@@ -313,13 +313,16 @@ To create a sandbox which is destroyed on shell exit (add to "~./bashrc")
 
   function pybox {
     local PYBOXDIR=$(mktemp -d --tmpdir pybox.XXXXXXXX)
-    virtualenv $PYBOXDIR
+    virtualenv --system-site-packages $PYBOXDIR
     source $PYBOXDIR/bin/activate
+    python -m pip install --upgrade pip --user
+    python -m pip install --upgrade setuptools --user
+    python -m pip install --upgrade wheel --user
     export PYBOXRM="${PYBOXRM}rm -r $PYBOXDIR;"
     trap "$PYBOXRM" EXIT
   }
 
-or on windows (add to "C:\\Users\\\$env:username\\\Documents\\\WindowsPowerShell\\\Microsoft.PowerShell_profile.ps1")
+or on windows (add to "C:\\Users\\$env:username\\Documents\\WindowsPowerShell\\Microsoft.PowerShell_profile.ps1")
 
 .. code-block:: powershell
 
@@ -327,15 +330,17 @@ or on windows (add to "C:\\Users\\\$env:username\\\Documents\\\WindowsPowerShell
     $parent = [System.IO.Path]::GetTempPath()
     [string] $name = -join ((65..90) + (97..122) + (48..57) | Get-Random -Count 8 | % {[char]$_})
     $tmppath = Join-Path $parent "pybox.$name"
-    write-host $tmppath
     New-Item -ItemType Directory -Path $tmppath | Out-Null
     return $tmppath
   }
 
   function pybox {
     $PYBOXDIR = New-TemporaryDirectory
-    virtualenv $PYBOXDIR
+    virtualenv --system-site-packages $PYBOXDIR
     invoke-expression "$PYBOXDIR\Scripts\activate.ps1"
+    python -m pip install --upgrade pip --user
+    python -m pip install --upgrade setuptools --user
+    python -m pip install --upgrade wheel --user
     invoke-expression "Register-EngineEvent PowerShell.Exiting {Remove-Item -Recurse -Force $PYBOXDIR} -SupportEvent"
   }
 
@@ -412,7 +417,7 @@ Windows
 Other dependencies (including essentials) in powershell:
 
 .. code-block:: powershell
-
+ set-executionpolicy remotesigned
  .\prepare_install-windows.ps1 -h
 
 or cmd
@@ -439,25 +444,76 @@ Help
 Signing
 -------
 
-Generate PGP keypair:
+Most of this comes from `here <https://blog.bravi.org/?p=1135>`_:
+
+Generate PGP keypair and publish:
 
 .. code-block:: bash
 
     while true; do ls -R / &>/dev/null; sleep 1; done &
     gpg --gen-key
-
-Generate a revocation certificate:
-
-.. code-block:: bash
-
-    gpg --output revoke.asc --gen-revoke YOURMASTERKEYID
-    shred --remove revoke.asc
-
-Publish public key:
-
-.. code-block:: bash
-
     gpg --keyserver pgp.mit.edu --send-keys YOURMASTERKEYID
+
+Add subkey and publish:
+
+.. code-block:: bash
+
+    while true; do ls -R / &>/dev/null; sleep 1; done &
+    gpg  --expert --edit-key YOURMASTERKEYID
+    # addkey, list, save
+    gpg --keyserver pgp.mit.edu --send-keys YOURMASTERKEYID
+
+Generate revocation certificate for master key:
+
+.. code-block:: bash
+
+    gpg --output YOURMASTERKEYID_revoke.asc --gen-revoke YOURMASTERKEYID
+
+Revoke master key:
+
+.. code-block:: bash
+
+    gpg --keyserver pgp.mit.edu --recv-keys YOURMASTERKEYID
+    gpg --import YOURMASTERKEYID_revoke.asc
+    gpg --keyserver pgp.mit.edu --send-keys YOURMASTERKEYID
+
+Revoke subkey:
+
+.. code-block:: bash
+
+    gpg  --expert --edit-key YOURMASTERKEYID
+    # toggle, list, revkey, save
+    gpg --keyserver pgp.mit.edu --send-keys YOURMASTERKEYID
+
+Delete master key from keyring (keeping only the subkeys):
+
+.. code-block:: bash
+
+    gpg --armor --export-secret-keys YOURMASTERKEYID > YOURMASTERKEYID_master.asc
+    gpg --armor --export-secret-subkeys YOURMASTERKEYID > YOURMASTERKEYID_subkeys.asc
+    gpg --delete-secret-key YOURMASTERKEYID
+    gpg --import YOURMASTERKEYID_subkeys.asc
+    shred --remove YOURMASTERKEYID_subkeys.asc
+
+Temporary keyring to use master key (e.g. for adding new subkeys):
+
+.. code-block:: bash
+
+    alias gpgtmp="gpg --no-default-keyring \
+                    --keyring ./tmp-public-kr.gpg \
+                    --secret-keyring ./tmp-private-kr.gpg \
+                    --trustdb-name ./tmp-trustdb.gpg"
+    
+    gpgtmp --import ../YOURMASTERKEYID_master.asc
+    # ... operations that require the master key ...
+    shred --remove ./tmp*.gpg
+
+Show all keys:
+
+.. code-block:: bash
+
+    gpg --list-keys
+    gpg --list-secret-keys
 
 Share public key:
 
@@ -466,25 +522,11 @@ Share public key:
     gpg --armor --export YOURMASTERKEYID
     (or look it up in pgp.mit.edu)
 
-Revoke PGP key:
+Copy (private) subkeys for signing on other servers:
 
 .. code-block:: bash
 
-    gpg --keyserver pgp.mit.edu --recv-keys YOURMASTERKEYID
-    gpg --import revoke.asc
-    gpg --keyserver pgp.mit.edu --send-keys YOURMASTERKEYID
-
-Share private PGP key:
-
-.. code-block:: bash
-
-    gpg --export-secret-key -a | ssh user@host gpg --import -
-
-Show all keys:
-
-.. code-block:: bash
-
-    gpg --list-keys
+    gpg --armor --export-secret-subkeys | ssh user@host gpg --import -
 
 
 .. _local-ref-start:
