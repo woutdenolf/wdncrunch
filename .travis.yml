@@ -10,7 +10,6 @@ notifications:
 env:
   global:
   - CACHED_FOLDER=$HOME/cached
-  - BUILD_FOLDER=$HOME/build
 
 matrix:
   include:
@@ -27,50 +26,44 @@ matrix:
       os: linux
 
 cache:
+  timeout: 1000
   directories:
   - $HOME/.cache/pip
   - $CACHED_FOLDER
 
 before_install:
   - mkdir -p $CACHED_FOLDER
-  - mkdir -p $BUILD_FOLDER
+  - export
+  - cd $CACHED_FOLDER
+  - |
+    if [ ${TRAVIS_OS_NAME:-'linux'} = 'linux' ]; then
+        source $TRAVIS_BUILD_DIR/ci/travis-linux-prepare.sh
+    fi
 
 install:
-  # Install Travis specific dependencies
-  - cd $BUILD_FOLDER
-  - |
-    if [ ${TRAVIS_OS_NAME:-'linux'} = 'linux' ]; then
-        . $TRAVIS_BUILD_DIR/ci/prepare_travis-linux.sh;
-    fi
-
   # Install general build dependencies
-  - cd $BUILD_FOLDER
+  - cd $CACHED_FOLDER
   - |
     if [ ${TRAVIS_OS_NAME:-'linux'} = 'linux' ]; then
-        . $TRAVIS_BUILD_DIR/tools/prepare_install-linux.sh -y -u;
+        source $TRAVIS_BUILD_DIR/tools/linux-install-deps.sh -y -u -x
     fi
-  - $PIPBIN install --upgrade -r $TRAVIS_BUILD_DIR/requirements-dev.txt
-
-  # Package directory  
-  - cd $TRAVIS_BUILD_DIR
 
   # Print Python info
-  - $PYTHONBIN ci/info_platform.py
-  - $PIPBIN list
+  - "python $TRAVIS_BUILD_DIR/ci/info_platform.py"
+  - "pip list"
 
   # Build package
-  - $PYTHONBIN setup.py build
-  - $PYTHONBIN setup.py build_doc
-  - ls build
-  - $PYTHONBIN setup.py sdist bdist_wheel
-  - ls dist
-
+  - cd $TRAVIS_BUILD_DIR
+  - "python setup.py build"
+  - "python setup.py sdist bdist_wheel"
+  - "python setup.py build_doc"
+  
   # Install package
   - PROJECTNAME=`python setup.py name|tail -1`
-  - cd $HOME
-  - $PIPBIN install --pre --no-index --find-links=$TRAVIS_BUILD_DIR/dist/ ${PROJECTNAME}
+  - "pip install --pre --no-index --find-links=dist/ ${PROJECTNAME}"
 
 script:
   # Test the installed package
-  - $PYTHONBIN -m $PROJECTNAME.tests.test_all
+  - cd $HOME
+  - "python -m ${PROJECTNAME}.tests.test_all"
 

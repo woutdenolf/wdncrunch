@@ -26,17 +26,17 @@ import unittest
 from ..modulea.tests import test_all as test_modulea
 from ..moduleb.tests import test_all as test_moduleb
 
-def test_suite_all():
+def test_suite():
     """Test suite including all test suites"""
     testSuite = unittest.TestSuite()
-    testSuite.addTest(test_modulea.test_suite_all())
-    testSuite.addTest(test_moduleb.test_suite_all())
+    testSuite.addTest(test_modulea.test_suite())
+    testSuite.addTest(test_moduleb.test_suite())
     return testSuite
 
 if __name__ == '__main__':
     import sys
 
-    mysuite = test_suite_all()
+    mysuite = test_suite()
     runner = unittest.TextTestRunner()
     if not runner.run(mysuite).wasSuccessful():
         sys.exit(1)
