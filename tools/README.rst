@@ -4,8 +4,6 @@ Guide for developers
 .. contents::
 
 
-.. _local-ref-configgit:
-
 Configure git
 -------------
 
@@ -16,10 +14,8 @@ Configure git
     git config --global core.autocrlf true
     git config --global user.signingkey YOURSUBKEYID!
 
-The signing key is only needed by project managers to sign tags and PyPi releases (:ref:`local-ref-signing`). Other contributors only need to concern themselves with pull-requests on Github (:ref:`local-ref-contribute`).
+The signing key is only needed by project managers to sign tags and PyPi releases (see `Signing`_). Other contributors only need to concern themselves with pull-requests on Github (see `Contribute`_).
 
-
-.. _local-ref-contribute:
 
 Contribute
 ----------
@@ -79,8 +75,6 @@ Assuming you forked the project on Github, then your fork will be referred to as
   git fetch -p upstream
 
 
-.. _local-ref-incversion:
-
 Bump version
 ------------
 
@@ -91,13 +85,13 @@ Bump version
   git checkout master
   git pull upstream master
 
-2. Update version in _version.py and update CHANGELOG.rst (:ref:`local-ref-version`)
+2. Update version in _version.py and update CHANGELOG.rst (see `Version number`_)
 
 .. code-block:: bash
   
   echo `python -c "from _version import version;print(\"v{}\".format(version));"`
 
-3. Check whether the branch can be build (:ref:`local-ref-build`)
+3. Check whether the branch can be build (see `Build`_)
 
 4. Commit and tag new version
 
@@ -119,8 +113,6 @@ Bump version
 
    compare: v1.2.3
 
-
-.. _local-ref-version:
 
 Version number
 ++++++++++++++
@@ -146,8 +138,6 @@ Version number
   final : stable version
 
 
-.. _local-ref-releaseversion:
-
 Release and deploy
 ------------------
 
@@ -159,7 +149,7 @@ Release and deploy
   git pull upstream master
   git checkout v1.2.3
 
-2. Build the branch (:ref:`local-ref-build`). Increase the version number when something needed fixing (:ref:`local-ref-incversion`).
+2. Build the branch (see `Build`_). Increase the version number when something needed fixing (see `Bump version`_).
 
 3. Create a release on Github based on the tag
 
@@ -167,7 +157,7 @@ Release and deploy
 
   Body: Copy from CHANGELOG
 
-4. Deploy code (see :ref:`local-ref-deployment` for pypi setup)
+4. Deploy code (see `Deploy`_ for pypi setup)
 
 .. code-block:: bash
 
@@ -181,8 +171,6 @@ Release and deploy
   https://testpypi.python.org/pypi?%3Aaction=pkg_edit&name=${PROJECT}
   http://pypi.python.org/pypi?%3Aaction=pkg_edit&name=${PROJECT}
 
-
-.. _local-ref-build:
 
 Build
 +++++
@@ -202,7 +190,7 @@ Build
   rm -r ${RELEASEDIR}
   mkdir -p ${RELEASEDIR}/dist
 
-3. Build the source tarball from a fresh git clone (in a clean sandbox :ref:`local-ref-sandbox`)
+3. Build the source tarball from a fresh git clone (in a clean sandbox, see `Sandbox`_)
 
 .. code-block:: bash
   
@@ -211,14 +199,14 @@ Build
   python setup.py clean sdist
   cp dist/${PROJECT}-${VERSION}.tar.gz ${RELEASEDIR}/dist
 
-4. Test the source (in a clean sandbox :ref:`local-ref-sandbox`)
+4. Test the source (in a clean sandbox, see `Sandbox`_)
 
 .. code-block:: bash
   
   pip install ${RELEASEDIR}/dist/${PROJECT}-${VERSION}.tar.gz
   python -m ${PROJECT}.tests.test_all
 
-5. Release the docs (in a clean sandbox :ref:`local-ref-sandbox`)
+5. Release the docs (in a clean sandbox, see `Sandbox`_)
 
 .. code-block:: bash
 
@@ -234,7 +222,7 @@ Build
   
   firefox build/sphinx/html/index.html
 
-7. Build the wheels on different platforms (in a clean sandbox :ref:`local-ref-sandbox`)
+7. Build the wheels on different platforms (in a clean sandbox, see `Sandbox`_)
 
 .. code-block:: bash
   
@@ -243,7 +231,7 @@ Build
   python setup.py clean bdist_wheel
   cp dist/${PROJECT}-${VERSION}-py2.py3-none-any.whl ${RELEASEDIR}/dist
 
-8. Test the wheels (in a clean sandbox :ref:`local-ref-sandbox`)
+8. Test the wheels (in a clean sandbox, see `Sandbox`_)
 
 .. code-block:: bash
   
@@ -251,10 +239,8 @@ Build
   python -m ${PROJECT}.tests.test_all
   pip uninstall -y ${PROJECT}
 
-9. Delete the sandboxes (:ref:`local-ref-sandbox`)
+9. Delete the sandboxes (see `Sandbox`_)
 
-
-.. _local-ref-deployment:
 
 Deploy
 ++++++
@@ -285,8 +271,6 @@ Register project (already done):
   twine register -r pypi dist/*.whl
   twine register -r pypitest dist/*.whl
 
-
-.. _local-ref-sandbox:
 
 Sandbox
 +++++++
@@ -417,6 +401,7 @@ Windows
 Other dependencies (including essentials) in powershell:
 
 .. code-block:: powershell
+
  set-executionpolicy remotesigned
  .\prepare_install-windows.ps1 -h
 
@@ -438,8 +423,6 @@ Help
     python setup.py sdist --help-formats
     python setup.py bdist --help-formats
 
-
-.. _local-ref-signing:
 
 Signing
 -------
@@ -529,8 +512,6 @@ Copy (private) subkeys for signing on other servers:
     gpg --armor --export-secret-subkeys | ssh user@host gpg --import -
 
 
-.. _local-ref-start:
-
 Start a project
 ---------------
 
@@ -560,7 +541,7 @@ Start a project
     sphinx-quickstart
     sphinx-apidoc -o doc/source/modules ${PROJECT}
 
-4. Check whether the project can be build (:ref:`local-ref-build`)
+4. Check whether the project can be build (see `Build`_)
 
 5. Create genesis version
 
